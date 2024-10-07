@@ -1,0 +1,36 @@
+image: kjarosh/latex:2023.1
+
+stages:
+  - build
+  - publish
+
+build:
+    stage: build
+    before_script:
+    - apk add py3-pygments
+    script:
+    - cd spec
+    - lualatex -shell-escape -recorder '\def\nocomments{}\input{doc.tex}'
+    - bibtex  "doc"
+    - lualatex -shell-escape -recorder '\def\nocomments{}\input{doc.tex}'
+    - bibtex  "doc"
+    - lualatex -shell-escape -recorder '\def\nocomments{}\input{doc.tex}'
+    - cd ..
+    - cp spec/doc.pdf specification.pdf
+    artifacts:
+        paths:
+        - specification.pdf
+
+pages:
+    stage: publish
+    dependencies:
+    - build
+    script:
+    - mkdir public
+    - cp specification.pdf public/
+    artifacts:
+        paths:
+        - public
+    only:
+    - master
+

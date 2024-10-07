@@ -1,0 +1,137 @@
+\subsection*{Unreleased}
+
+Proof rules:
+\begin{itemize}
+  \item Addition of a section describing bitvector proofs.
+  \item Bitblasting rules: \proofRule{bitblast_extract},  \proofRule{bitblast_add},
+      \proofRule{bitblast_ult}.
+  \item Addition of rules \proofRule{la_mult_pos} and \proofRule{la_mult_neg} to describe multiplication with a positive or negative factor.
+  \item Addition of rules \proofRule{symm} and \proofRule{not_symm} to express symmetry of equality explicitly.
+  \item Addition of the rule \proofRule{eq_symmetric} to express symmetry
+  of equality explicitly but as an equivalence. Note that in principle this
+  could be done with the rule \proofRule{symm} above, but would require a long
+  and tedious use of \proofRule{subproof} for each direction of the equivalence.
+  \item Addition of the rule \proofRule{weakening} to express weakening of a
+        clause.
+  \item Addition of the \proofRule{reordering} rule to represent reordering of
+        the literals in a clause.
+  \item Addition of the \proofRule{bind_let} rule.  This rule can be used to
+        preprocess \inlineAlethe{let} expressions similar to the \proofRule{bind}
+        rule used with ordinary quantifiers.
+\end{itemize}
+
+\noindent
+Breaking changes:
+\begin{itemize}
+  \item Allow arbitrary extra annotations in \texttt{assume} commands.
+  \item Add the sort to all variables in contexts.  Before, the context
+        of a bind could be \texttt{(x S) (:= y x)}.  Now it must
+        be \texttt{(x S) (:= (y S) x)}.
+  \item The arguments for \proofRule{forall_inst} have been changed to
+        no longer take the shape of bindings using \texttt{(:= x c)}.
+        Instead, the list of instantiation terms must follow the variable
+        order and cover all the respective bound variables.
+  \item The rules \proofRule{and_pos}, \proofRule{or_neg}, \proofRule{and},
+        \proofRule{not_or} now have one argument that indicates which subterm
+        they use.
+  \item Add new syntax for decimal and negative numbers and use it
+        for \proofRule{la_generic}.
+  \item Restrict sorting of numbers such that the sort of a constant is
+        only determined by its syntactic category.
+  \item Add new syntax for decimal and negative numbers and clarify that
+        the set of allowed symbols is restricted to not conflict with this
+        new syntax.
+  \item Always use decimals for the constants in \proofRule{la_generic}.
+  \item Restrict sorting of numbers such that the sort of a constant is
+        only determined by its syntactic category.
+\end{itemize}
+
+\noindent
+Clarifications and corrected errors:
+\begin{itemize}
+  \item Clarify that the \texttt{:args} annotation in \texttt{anchor} can be
+        omitted if the list is empty.
+  \item Clarify that \proofRule{bind} can work on existential and universal
+        quantifiers.
+  \item Fix mistake in proof grammar.  It now uses the \texttt{context\_annotation}
+        non-terminal in the rule for the \texttt{anchor} command.
+  \item Fix the example of \proofRule{onepoint}.
+  \item Add the missing context to the conclusion of \proofRule{bind},
+        \proofRule{sko_ex}, \proofRule{sko_forall}, \proofRule{onepoint}.
+\end{itemize}
+
+\subsection*{0.3 --- \DTMdisplaydate{2023}{02}{10}{-1}}
+
+This release overhauls the entire document, but introduces only few
+changes to the proof format itself.
+
+The standard now specifies that \texttt{assume} commands can only be
+issued at the start of the proof or right after an \texttt{anchor}
+command.
+
+Beyond many smaller clarifications and typographic improvements, the
+following changes are implemented in this release.
+\begin{itemize}
+  \item Add an abstract proof checking procedure to clarify
+  the semantics of the proof format.
+  \item Add a description of the semantics of contexts based on λ-terms.
+  \item List all transformations that are implicit in Alethe proofs.
+  \item Change the notation used for terms from first-order style
+   (e.g., $f(x,g(y))$) to higher-order style (e.g.,
+   $(f\;x\;(g\;y))$).  This is only a change in notation -- the used logic
+   remains many-sorted first-order logic.
+  \item Eliminate the distinction between if-and-only-if and
+  equality.  Instead, use equality (the symbol $≈$) with appropriate
+   sorts.
+  \item Add an index that lists all proof rules.
+\end{itemize}
+
+Proof rules:
+\begin{itemize}
+  \item The rule \proofRule{implies_simplify} is no longer allowed to
+  perform the simplification $(\varphi_1\rightarrow \varphi_2)\rightarrow \varphi_2
+  ⇒  \varphi_1\lor \varphi_2$.  This is now covered by \proofRule{bool_simplify}.
+\end{itemize}
+
+\subsection*{0.2 --- \DTMdisplaydate{2022}{12}{19}{-1}}
+
+This is an intermediate release.  It collects all changes to the original
+specification document before the major changes that were implemented as
+part of Hans-Jörg Schurr's PhD thesis.   These changes will be reflected
+in release 0.3.
+
+This release implements major changes to the structure of the document to
+clarify the difference between the \emph{language} and the \emph{rules}.
+The language has a formal definition and a proof of soundness.  The syntax
+describes how proofs are encoded in the text file.
+
+The syntax was extended to allow extra annotations.  Tools consuming Alethe
+proofs must be able to ignore such extra annotations.
+
+List of rules:
+\begin{itemize}
+    \item Improve description of \proofRule{sko_ex}.
+    \item Add {\proofRule{hole}} rule to allow holes.  A proof that contains
+    steps that use this rule is not valid.
+\end{itemize}
+\noindent
+Corrections:
+\begin{itemize}
+    \item Grammar: the \texttt{choice} binder can only bind one variable.
+\end{itemize}
+
+\noindent
+Clarifications:
+\begin{itemize}
+    \item Clarify functionality of choice in introduction.
+    \item Add illustrating example to introduction.
+    \item Normalize printing of (variable, term) arguments in the abstract notation.
+    \item Fix linear arithmetic example in introduction.
+    \item Change syntax of abstract proof steps to be clearer.
+\end{itemize}
+
+
+\subsection*{0.1 -- \DTMdisplaydate{2021}{07}{10}{-1}}
+
+This is the first public release of this document.  It coincides with
+the seventh PxTP Workshop.

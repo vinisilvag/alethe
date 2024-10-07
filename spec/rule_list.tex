@@ -1,0 +1,2027 @@
+This section provides a list of all proof rules supported by
+Alethe.  To make this long list more accessible, the section
+first lists multiple classes of proof rules.  The classes are not
+mutually exclusive: for example, the \proofRule{la_generic} rule is
+both a linear arithmetic rule and introduces a tautology.
+The number in brackets is the position of the rule in the overall list
+of proof rules.
+Table~\ref{rule-tab:special} lists rules that serve a special purpose.
+Table~\ref{rule-tab:tautologies} lists all rules that introduce
+tautologies.  That is, regular rules that do not use premises.
+
+The subsequent section, starting at \ref{sec:alethe:rules-list}, defines
+all rules and provides example proofs for complicated rules.
+The index of proof rules on page \pageref{sec:alethe:rules-index} can be used
+to quickly find the definition of rules.
+
+\subsection{Classifications of the Rules}
+\label{sec:alethe:rules-overview}
+
+\begin{xltabular}{\linewidth}{l X}
+\caption{Special rules.}
+\label{rule-tab:special}\\
+  Rule & Description \\
+  \hline
+  \ruleref{assume}   & Introduction of an assumption. \\
+  \ruleref{hole}     & Placeholder for rules not defined here. \\
+  \ruleref{subproof} & Concludes a subproof and discharges local assumptions. \\
+\end{xltabular}
+
+\begin{xltabular}{\linewidth}{l X}
+\caption{Resolution and related rules.}
+\label{rule-tab:resolution}\\
+  Rule & Description \\
+  \hline
+  \ruleref{resolution} & Chain resolution of two or more clauses. \\
+  \ruleref{th_resolution} & As \proofRule{resolution}, but used by theory solvers. \\
+  \ruleref{tautology} & Simplification of tautological clauses to $\top$. \\
+  \ruleref{contraction} & Removal of duplicated literals. \\
+\end{xltabular}
+
+\begin{xltabular}{\linewidth}{l X}
+\caption{Rules introducing tautologies.}
+\label{rule-tab:tautologies}\\
+  Rule & Description \\
+  \hline
+\ruleref{true} & $\top$ \\
+\ruleref{false} & $\neg\bot$ \\
+\ruleref{not_not} & $\neg(\neg\neg\varphi), \varphi$ \\
+\ruleref{la_generic} & Tautologous disjunction of linear inequalities. \\
+\ruleref{lia_generic} & Tautologous disjunction of linear integer inequalities. \\
+\ruleref{la_disequality} & $t_1 ≈ t_2 \lor \neg (t_1 \leq t_2) \lor \neg (t_2 \leq t_1)$ \\
+\ruleref{la_totality} & $t_1 \leq t_2 \lor t_2 \leq t_1$ \\
+\ruleref{la_tautology} & A trivial linear tautology. \\
+\ruleref{la_mult_pos} & Multiplication with a positive factor. \\
+\ruleref{la_mult_neg} & Multiplication with a negative factor.\\
+\ruleref{forall_inst} & Quantifier instantiation. \\
+\ruleref{refl} & Reflexivity after applying the context. \\
+\ruleref{eq_reflexive} & $t ≈ t$ without context. \\
+\ruleref{eq_transitive} & $\neg (t_1 ≈ t_2) , \dots , \neg (t_{n-1} ≈ t_n) , t_1 ≈ t_n$ \\
+\ruleref{eq_congruent} & $\neg (t_1 ≈ u_1) , \dots , \neg (t_n ≈ u_n) , f(t_1, \dots, t_n) ≈ f(u_1, \dots, u_n)$ \\
+\ruleref{eq_congruent_pred} & $\neg (t_1 ≈ u_1) , \dots , \neg (t_n ≈ u_n) , P(t_1, \dots, t_n) ≈ P(u_1, \dots, u_n)$ \\
+\ruleref{qnt_cnf} & Clausification of a quantified formula. \\
+\ruleref{and_pos} & $\neg (\varphi_1 \land \dots \land \varphi_n) , \varphi_k $ \\
+\ruleref{and_neg} & $ (\varphi_1 \land \dots \land \varphi_n), \neg\varphi_1  , \dots , \neg\varphi_n $ \\
+\ruleref{or_pos} & $ \neg (\varphi_1 \lor \dots \lor \varphi_n) , \varphi_1 , \dots , \varphi_n $ \\
+\ruleref{or_neg} & $ (\varphi_1 \lor \dots \lor \varphi_n) , \neg \varphi_k $; with $1\leq k \leq n$ \\
+\ruleref{xor_pos1} & $ \neg (\varphi_1 \,\lsymb{xor}\, \varphi_2) , \varphi_1 , \varphi_2 $ \\
+\ruleref{xor_pos2} & $ \neg (\varphi_1 \,\lsymb{xor}\, \varphi_2), \neg \varphi_1, \neg \varphi_2 $ \\
+\ruleref{xor_neg1} & $ \varphi_1 \,\lsymb{xor}\, \varphi_2, \varphi_1 , \neg \varphi_2 $ \\
+\ruleref{xor_neg2} & $ \varphi_1 \,\lsymb{xor}\, \varphi_2, \neg \varphi_1 , \varphi_2 $ \\
+\ruleref{implies_pos} & $ \neg (\varphi_1 \rightarrow \varphi_2), \neg \varphi_1 , \varphi_2 $ \\
+\ruleref{implies_neg1} & $ \varphi_1 \rightarrow \varphi_2, \varphi_1 $ \\
+\ruleref{implies_neg2} & $ \varphi_1 \rightarrow \varphi_2, \neg \varphi_2 $ \\
+\ruleref{equiv_pos1} & $\neg (\varphi_1 ≈ \varphi_2) , \varphi_1 , \neg \varphi_2$ \\
+\ruleref{equiv_pos2} & $\neg (\varphi_1 ≈ \varphi_2) , \neg \varphi_1 , \varphi_2$ \\
+\ruleref{equiv_neg1} & $\varphi_1 ≈ \varphi_2 , \neg \varphi_1 , \neg \varphi_2$ \\
+\ruleref{equiv_neg2} & $\varphi_1 ≈ \varphi_2 , \varphi_1 , \varphi_2$ \\
+\ruleref{ite_pos1} & $\neg (\lsymb{ite}\ \varphi_1\;\varphi_2\;\varphi_3) , \varphi_1 , \varphi_3$ \\
+\ruleref{ite_pos2} & $\neg (\lsymb{ite}\ \varphi_1\;\varphi_2\;\varphi_3) , \neg \varphi_1 , \varphi_2$ \\
+\ruleref{ite_neg1} & $(\lsymb{ite}\ \varphi_1\;\varphi_2\;\varphi_3) , \varphi_1 , \neg \varphi_3$ \\
+\ruleref{ite_neg2} & $(\lsymb{ite}\ \varphi_1\;\varphi_2\;\varphi_3) , \neg \varphi_1 , \neg \varphi_2$ \\
+\ruleref{connective_def} & Definition of some connectives. \\
+\ruleref{and_simplify} & Simplification of a conjunction. \\
+\ruleref{or_simplify} & Simplification of a disjunction. \\
+\ruleref{not_simplify} & Simplification of a Boolean negation. \\
+\ruleref{implies_simplify} & Simplification of an implication. \\
+\ruleref{equiv_simplify} & Simplification of an equivalence. \\
+\ruleref{bool_simplify} & Simplification of combined Boolean connectives. \\
+\ruleref{ac_simp} & Flattening and removal of duplicates for $\lor$ or $\land$. \\
+\ruleref{ite_simplify} & Simplification of if-then-else. \\
+\ruleref{qnt_simplify} & Simplification of constant quantified formulas. \\
+\ruleref{qnt_join} & Joining of consecutive quantifiers. \\
+\ruleref{qnt_rm_unused} & Removal of unused quantified variables. \\
+\ruleref{eq_simplify} & Simplification of equality. \\
+\ruleref{div_simplify} & Simplification of division. \\
+\ruleref{prod_simplify} & Simplification of products. \\
+\ruleref{unary_minus_simplify} & Simplification of the unary minus. \\
+\ruleref{minus_simplify} & Simplification of subtractions. \\
+\ruleref{sum_simplify} & Simplification of sums. \\
+\ruleref{comp_simplify} & Simplification of arithmetic comparisons. \\
+\ruleref{distinct_elim} & Elimination of the $\lsymb{distinct}$ operator. \\
+\ruleref{la_rw_eq} & $(t ≈ u) ≈ (t \leq u \land u \leq t)$ \\
+\ruleref{nary_elim} & Eliminate $n$-ary application of operators via binary applications. \\
+\ruleref{eq_symmetric} & Symmetry of equality as equivalence. \\
+% TODO
+\ruleref{string_length_pos} & Trivial tautology about the length of a String term. \\
+\end{xltabular}
+
+\begin{xltabular}{\linewidth}{l X}
+\caption{Linear arithmetic rules.}
+\label{rule-tab:la-tauts}\\
+  Rule & Description \\
+  \hline
+\ruleref{la_generic} & Tautologous disjunction of linear inequalities. \\
+\ruleref{lia_generic} & Tautologous disjunction of linear integer inequalities. \\
+\ruleref{la_disequality} & $t_1 ≈ t_2 \lor \neg (t_1 \leq t_2) \lor \neg (t_2 \leq t_1)$ \\
+\ruleref{la_totality} & $t_1 \leq t_2 \lor t_2 \leq t_1$ \\
+\ruleref{la_tautology} & A trivial linear tautology. \\
+\ruleref{la_mult_pos} & Multiplication with a positive factor. \\
+\ruleref{la_mult_neg} & Multiplication with a negative factor.\\
+\ruleref{la_rw_eq} & $(t ≈ u) ≈ (t \leq u \land u \leq t)$ \\
+\ruleref{div_simplify} & Simplification of division. \\
+\ruleref{prod_simplify} & Simplification of products. \\
+\ruleref{unary_minus_simplify} & Simplification of the unary minus. \\
+\ruleref{minus_simplify} & Simplification of subtractions. \\
+\ruleref{sum_simplify} & Simplification of sums. \\
+\ruleref{comp_simplify} & Simplification of arithmetic comparisons. \\
+\end{xltabular}
+
+\begin{xltabular}{\linewidth}{l X}
+\caption{Quantifier handling.}
+\label{rule-tab:quants}\\
+  Rule & Description \\
+  \hline
+\ruleref{forall_inst} & Instantiation of a universal quantifier. \\
+\ruleref{bind} & Renaming of bound variables. \\
+\ruleref{sko_ex} & Skolemization of an existential quantifier. \\
+\ruleref{sko_forall} & Skolemization of an universal quantifier. \\
+\ruleref{qnt_cnf} & Clausification of quantified formulas. \\
+\ruleref{qnt_simplify} & Simplification of constant quantified formulas. \\
+\ruleref{onepoint} & The one-point rule. \\
+\ruleref{qnt_join} & Joining of consecutive quantifiers. \\
+\ruleref{qnt_rm_unused} & Removal of unused quantified variables. \\
+\end{xltabular}
+
+\begin{xltabular}{\linewidth}{l X}
+\caption{Skolemization rules.}
+\label{rule-tab:skos}\\
+  Rule & Description \\
+  \hline
+\ruleref{sko_ex} & Skolemization of existential variables. \\
+\ruleref{sko_forall} & Skolemization of universal variables. \\
+\end{xltabular}
+
+\begin{xltabular}{\linewidth}{l X}
+\caption{Clausification rules.  These rules can be used to perform propositional
+clausification.}
+\label{rule-tab:clausification}\\
+  Rule & Description \\
+  \hline
+\ruleref{and} & And elimination. \\
+\ruleref{not_or} & Elimination of a negated disjunction. \\
+\ruleref{or} & Disjunction to clause. \\
+\ruleref{not_and} & Distribution of negation over a conjunction. \\
+\ruleref{xor1} & From $\,(\lsymb{xor}\, \varphi_1\, \varphi_2)$ to $\varphi_1, \varphi_2$. \\
+\ruleref{xor2} & From $\,(\lsymb{xor}\, \varphi_1\, \varphi_2)$ to $\neg\varphi_1, \neg\varphi_2$. \\
+\ruleref{not_xor1} & From $\neg(\,\lsymb{xor}\, \varphi_1\, \varphi_2)$ to $\varphi_1, \neg\varphi_2$. \\
+\ruleref{not_xor2} & From $\neg(\,\lsymb{xor}\, \varphi_1\, \varphi_2)$ to $\neg\varphi_1, \varphi_2$. \\
+\ruleref{implies} & From $ \varphi_1\rightarrow\varphi_2 $ to $\neg\varphi_1 , \varphi_2 $. \\
+\ruleref{not_implies1} & From $\neg (\varphi_1\rightarrow\varphi_2)$ to $\varphi_1$. \\
+\ruleref{not_implies2} & From $\neg (\varphi_1\rightarrow\varphi_2)$ to $\neg\varphi_2$. \\
+\ruleref{equiv1} & From $ \varphi_1≈\varphi_2$ to $\neg\varphi_1 , \varphi_2$. \\
+\ruleref{equiv2} & From $ \varphi_1≈\varphi_2$ to $\varphi_1 , \neg\varphi_2$. \\
+\ruleref{not_equiv1} & From $\neg(\varphi_1≈\varphi_2)$ to $\varphi_1 , \varphi_2$. \\
+\ruleref{not_equiv2} & From $\neg(\varphi_1≈\varphi_2)$ to $\neg\varphi_1 , \neg\varphi_2$. \\
+\ruleref{and_pos} & $\neg (\varphi_1 \land \dots \land \varphi_n), \varphi_k$\\
+\ruleref{and_neg} & $(\varphi_1 \land \dots \land \varphi_n), \neg\varphi_1, \dots , \neg\varphi_n $ \\
+\ruleref{or_pos} & $\neg (\varphi_1 \lor \dots \lor \varphi_n) , \varphi_1 , \dots
+  , \varphi_n $ \\
+\ruleref{or_neg} &
+$ (\varphi_1 \lor \dots \lor \varphi_n) , \neg \varphi_k $\\
+\ruleref{xor_pos1} &
+$ \neg (\varphi_1 \,\lsymb{xor}\, \varphi_2) , \varphi_1 , \varphi_2 $ \\
+\ruleref{xor_pos2} &
+$ \neg (\varphi_1 \,\lsymb{xor}\, \varphi_2)
+, \neg \varphi_1, \neg \varphi_2 $ \\
+\ruleref{xor_neg1} &
+$ \varphi_1 \,\lsymb{xor}\, \varphi_2, \varphi_1 , \neg \varphi_2 $ \\
+\ruleref{xor_neg2} &
+$ \varphi_1 \,\lsymb{xor}\, \varphi_2, \neg \varphi_1 , \varphi_2 $ \\
+\ruleref{implies_pos} &
+$ \neg (\varphi_1 \rightarrow \varphi_2), \neg \varphi_1 , \varphi_2 $ \\
+\ruleref{implies_neg1} &
+$ \varphi_1 \rightarrow \varphi_2, \varphi_1 $ \\
+\ruleref{implies_neg2} &
+$ \varphi_1 \rightarrow \varphi_2, \neg \varphi_2 $ \\
+\ruleref{equiv_pos1} &
+$\neg (\varphi_1 ≈ \varphi_2) , \varphi_1 , \neg \varphi_2$ \\
+\ruleref{equiv_pos2} &
+$\neg (\varphi_1 ≈ \varphi_2) , \neg \varphi_1 , \varphi_2$ \\
+\ruleref{equiv_neg1} &
+$\varphi_1 ≈ \varphi_2 , \neg \varphi_1 , \neg \varphi_2$ \\
+\ruleref{equiv_neg2} &
+$\varphi_1 ≈ \varphi_2 , \varphi_1 , \varphi_2$ \\
+\ruleref{let} & Elimination of the $\lsymb{let}$ operator.  \\
+\ruleref{distinct_elim} & Elimination of the $\lsymb{distinct}$ operator.  \\
+\ruleref{nary_elim} & Elimination of n-ary application of operators. \\
+\end{xltabular}
+
+\begin{xltabular}{\linewidth}{l X}
+\caption{Simplification rules. These rules represent typical operator-level
+simplifications.}
+\label{rule-tab:simplification}\\
+  Rule & Description \\
+  \hline
+\ruleref{connective_def} & Definition of the Boolean connectives. \\
+\ruleref{and_simplify} & Simplification of a conjunction. \\
+\ruleref{or_simplify} & Simplification of a disjunction. \\
+\ruleref{not_simplify} & Simplification of a Boolean negation. \\
+\ruleref{implies_simplify} & Simplification of an implication. \\
+\ruleref{equiv_simplify} & Simplification of an equivalence. \\
+\ruleref{bool_simplify} & Simplification of combined Boolean connectives. \\
+\ruleref{ac_simp} & Flattening and removal of duplicates for $\lor$ or $\land$. \\
+\ruleref{ite_simplify} & Simplification of if-then-else. \\
+\ruleref{qnt_simplify} & Simplification of constant quantified formulas. \\
+\ruleref{onepoint} & The one-point rule. \\
+\ruleref{qnt_join} & Joining of consecutive quantifiers. \\
+\ruleref{qnt_rm_unused} & Removal of unused quantified variables. \\
+\ruleref{eq_simplify} & Simplification of equalities. \\
+\ruleref{div_simplify} & Simplification of division. \\
+\ruleref{prod_simplify} & Simplification of products. \\
+\ruleref{unary_minus_simplify} & Simplification of the unary minus. \\
+\ruleref{minus_simplify} & Simplification of subtractions. \\
+\ruleref{sum_simplify} & Simplification of sums. \\
+\ruleref{comp_simplify} & Simplification of arithmetic comparisons. \\
+\ruleref{qnt_simplify} & Simplification of constant quantified formulas. \\
+\end{xltabular}
+
+\begin{xltabular}{\linewidth}{l X}
+\caption{Bitvector rules.}
+\label{rule-tab:bitblasting}\\
+  Rule & Description \\
+  \hline
+\ruleref{bitblast_extract} & Bitblasting of $\lsymb{extract}$. \\
+\ruleref{bitblast_ult} & Bitblasting of $\lsymb{ult}$. \\
+\ruleref{bitblast_add} & Bitblasting of $\lsymb{add}$. \\
+\end{xltabular}
+
+% TODO
+\begin{xltabular}{\linewidth}{l X}
+\caption{Strings rules.}
+\label{rule-tab:strings}\\
+  Rule & Description \\
+  \hline
+\ruleref{concat_eq} & Rule description. \\
+\ruleref{concat_unify} & Rule description. \\
+\ruleref{concat_conflict} & Rule description. \\
+\ruleref{concat_split_prefix} & Rule description. \\
+\ruleref{concat_split_suffix} & Rule description. \\
+\ruleref{concat_csplit_prefix} & Rule description. \\
+\ruleref{concat_csplit_suffix} & Rule description. \\
+\ruleref{concat_lprop_prefix} & Rule description. \\
+\ruleref{concat_lprop_suffix} & Rule description. \\
+\ruleref{concat_cprop_prefix} & Rule description. \\
+\ruleref{concat_cprop_suffix} & Rule description. \\
+\ruleref{string_length_pos} & Trivial tautology about the length of a String term. \\
+\ruleref{string_length_non_empty} & Rule description. \\
+\ruleref{re_inter} & Rule description. \\
+\ruleref{re_unfold_neg} & Rule description. \\
+\ruleref{re_unfold_neg_concat_fixed_prefix} & Rule description. \\
+\ruleref{re_unfold_neg_concat_fixed_suffix} & Rule description. \\
+\end{xltabular}
+
+% TODO
+\begin{xltabular}{\linewidth}{l X}
+\caption{Rules used by cvc5, but not by veriT.}
+\label{rule-tab:cvc5}\\
+  Rule & Description \\
+  \hline
+\ruleref{concat_eq} & Rule description. \\
+\ruleref{concat_unify} & Rule description. \\
+\ruleref{concat_conflict} & Rule description. \\
+\ruleref{concat_split_prefix} & Rule description. \\
+\ruleref{concat_split_suffix} & Rule description. \\
+\ruleref{concat_csplit_prefix} & Rule description. \\
+\ruleref{concat_csplit_suffix} & Rule description. \\
+\ruleref{concat_lprop_prefix} & Rule description. \\
+\ruleref{concat_lprop_suffix} & Rule description. \\
+\ruleref{concat_cprop_prefix} & Rule description. \\
+\ruleref{concat_cprop_suffix} & Rule description. \\
+\ruleref{string_length_pos} & Trivial tautology about the length of a String term. \\
+\ruleref{string_length_non_empty} & Rule description. \\
+\ruleref{re_inter} & Rule description. \\
+\ruleref{re_unfold_neg} & Rule description. \\
+\ruleref{re_unfold_neg_concat_fixed_prefix} & Rule description. \\
+\ruleref{re_unfold_neg_concat_fixed_suffix} & Rule description. \\
+\ruleref{bitblast_extract} & Bitblasting of $\lsymb{extract}$. \\
+\ruleref{bitblast_ult} & Bitblasting of $\lsymb{ult}$. \\
+\ruleref{bitblast_add} & Bitblasting of $\lsymb{add}$. \\
+\ruleref{la_mult_pos} & Multiplication with a positive factor. \\
+\ruleref{la_mult_neg} & Multiplication with a negative factor.\\
+\ruleref{symm}     & Symmetry of equality. \\
+\ruleref{not_symm} & Symmetry of not-equal.\\
+\ruleref{reordering} & Reording of the literals in a clause.\\
+\end{xltabular}
+
+\begin{xltabular}{\linewidth}{l X}
+\caption{Rules used by the Carcara elaborator.}
+\label{rule-tab:cvc5}\\
+  Rule & Description \\
+  \hline
+\ruleref{weakening} & Weakening of a clause. \\
+\ruleref{eq_symmetric} & Symmetry of equality as equivalence. \\
+\end{xltabular}
+\subsection{Rule List}
+\label{sec:alethe:rules-list}
+
+\begin{RuleDescription}{assume}
+\begin{AletheX}
+$i$. & \ctxsep & $\varphi$ & \currule \\
+\end{AletheX}
+  where $\varphi$ corresponds up to the orientation of equalities
+  to a formula asserted in the input problem, or $\varphi$ is a local assumption
+  in a subproof.
+  \ruleparagraph{Remark.}
+  This rule can not be used by the
+  \inlineAlethe{(step }\dots\inlineAlethe{)} command. Instead it corresponds to the dedicated
+  \inlineAlethe{(assume }\dots\inlineAlethe{)} command.
+\end{RuleDescription}
+
+\begin{RuleDescription}{hole}
+
+\begin{AletheX}
+$i$. & \ctxsep & $\varphi$  & $(\currule\; p_2, \dots, p_n)\, [a_1, \dots, a_m]$ \\
+\end{AletheX}
+where $\varphi$ is any well-formed formula.
+
+This rule can be used to express holes in the proof.  It can be used by
+solvers as a placeholder for proof steps that are not yet expressed
+by the proof rules in this document.  A proof checker {\em must not}
+accept a proof as valid that contains this rule even if the checker can
+somehow check this rule.  However, it is possible for checkers to have
+a dedicated status for proofs that contain this rule and are otherwise
+valid.  Any other tool can accept or reject proofs that contain this rule.
+
+The premises and arguments are arbitrary, but must follow the syntax
+for premises and arguments.
+\end{RuleDescription}
+
+\begin{RuleDescription}{true}
+\begin{AletheX}
+$i$. & \ctxsep & $\top$     & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{false}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg\bot$     & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{not_not}
+
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (\neg \neg \varphi)$, $\varphi$  & \currule \\
+\end{AletheX}
+\ruleparagraph{Remark.} This rule is useful to remove double negations from a
+clause by resolving a clause with the double negation on $\varphi$.
+\end{RuleDescription}
+
+\begin{RuleDescription}{th_resolution}
+This rule is the resolution of two or more clauses.
+
+\begin{AletheX}
+$i_1$. & \ctxsep & $l^1_1$, $\dots$, $l^1_{k^1}$  & ($\ruleType{...}$) \\
+\aletheLine
+$i_n$. & \ctxsep & $l^n_1$, $\dots$, $l^n_{k^n}$  & ($\ruleType{...}$) \\
+  $j$. & \ctxsep & $l^{r_1}_{s_1}$, $\dots$, $l^{r_m}_{s_m}$  & ($\currule\;i_1,\dots, i_n$) \\
+\end{AletheX}
+where $l^{r_1}_{s_1} , \dots , l^{r_m}_{s_m}$ are from $l^{i}_{j}$ and
+are the result of a chain of predicate resolution steps on the clauses of
+$i_1$ to $i_n$. It is possible that $m = 0$, i.e. that
+the result is the empty clause.  When performing resolution steps, the
+rule implicitly merges repeated negations at the start of the formulas
+$l^{i}_{j}$.  For example, the formulas $\neg\neg\neg P$ and $\neg\neg P$
+can serve as pivots during resolution.  The first formula is interpreted as
+$\neg P$ and the second as just $P$ for the purpose of performing resolution
+steps.
+
+This rule is only used when the resolution step is not emitted by the SAT solver.
+See the equivalent \proofRule{resolution} rule for the rule emitted by the
+SAT solver.
+
+\ruleparagraph{Remark.} The definition given here is very general.  The motivation
+for this is to ensure the definition covers all possible resolution steps generated
+by the existing proof generation code in veriT.  It will be restricted after
+a full review of the code.  As a consequence of this checking this rule is
+theoretically NP-complete.  In practice, however, the \currule-steps
+produced by {\verit} are simple. Experience with reconstructing the step in
+{\isabelle} shows that checking can done by naive decision procedures. The
+vast majority of \currule-steps are binary resolution steps.
+\end{RuleDescription}
+
+\begin{RuleDescription}{resolution}
+This rule is equivalent to the \proofRule{th_resolution} rule, but it is
+emitted by the SAT solver instead of theory reasoners. The differentiation
+serves only informational purpose.
+
+\end{RuleDescription}
+
+\begin{RuleDescription}{tautology}
+\begin{AletheX}
+$i$. & \ctxsep & $l_1$, \dots, $l_k$, \dots, $l_m$, \dots, $l_n$  & ($\dots$) \\
+$j$. & \ctxsep & $\top$  & (\currule\; $i$) \\
+\end{AletheX}
+  and $l_k$, $l_m$ are such that
+  \begin{align*}
+  l_k &= \underbrace{\neg \dots \neg}_o \varphi \\
+  l_m &= \underbrace{\neg \dots \neg}_p \varphi
+  \end{align*}
+  and one of $o, p$\/ is odd and the other even.  Either can be $0$.
+\end{RuleDescription}
+
+\begin{RuleDescription}{contraction}
+\begin{AletheX}
+$i$. & \ctxsep  & $l_1$, \dots, $l_n$  & ($\dots$) \\
+$j$. & \ctxsep  & $l_{k_1}$, \dots, $l_{k_m}$  & (\currule\; $i$) \\
+\end{AletheX}
+  where $m \leq n$ and  $k_1 \dots k_m$ is a monotonic map to $1 \dots n$
+  such that $l_{k_1} \dots l_{k_m}$ are pairwise distinct and
+  $\{l_1, \dots, l_n\} = \{l_{k_1}, \dots, l_{k_m}\}$.
+  Hence, this rule removes duplicated literals.
+\end{RuleDescription}
+
+\begin{RuleDescription}{subproof}
+The \currule{} rule completes a subproof and discharges local
+assumptions. Every subproof starts with some \proofRule{assume} steps. The
+last step of the subproof is the conclusion.
+
+\begin{AletheX}
+$i_1$. & \spctxsep  & $\varphi_1$  & $\proofRule{assume}$ \\
+\aletheLine
+$i_n$. & \spctxsep  & $\varphi_n$  & $\proofRule{assume}$ \\
+\aletheLineB
+$j$. & \spctxsep  & $\psi$  & ($\dots$) \\
+\spsep
+k. & \ctxsep  & $\neg\varphi_1$,\dots, $\neg\varphi_n$, $\psi$   & $\proofRule{subproof}$ \\
+\end{AletheX}
+
+\end{RuleDescription}
+
+\begin{RuleDescription}{la_generic}
+A step of the \currule{} rule represents a tautological clause of linear
+disequalities.  It can be checked by showing that the conjunction of
+the negated disequalities is unsatisfiable. After the application of
+some strengthening rules, the resulting conjunction is unsatisfiable,
+even if integer variables are assumed to be real variables.
+
+A linear inequality is of term of the form
+\[
+\sum_{i=0}^{n}c_i\times{}t_i +
+d_1\bowtie \sum_{i=n+1}^{m} c_i\times{}t_i + d_2
+\]
+where $\bowtie\;\in \{≈, <,
+>, \leq, \geq\}$, where $m\geq n$, $c_i, d_1, d_2$ are either integer or real
+constants, and for each $i$ $c_i$ and $t_i$ have the same sort. We will write
+$s_1 \bowtie s_2$.
+
+Let $l_1,\dots, l_n$ be linear inequalities and $a_1, \dots, a_n$
+rational numbers, then a {\currule} step has the form
+
+\begin{AletheX}
+$i$. & \ctxsep & $\varphi_1$, \dots , $\varphi_o$  & \currule\, [$a_1$, \dots, $a_o$] \\
+\end{AletheX}
+where $\varphi_i$ is either $\neg l_i$ or $l_i$, but never $s_1
+≈ s_2$.
+
+The constants $a_i$ are of sort \inlineAlethe{Real} and must be printed
+using one of the productions $\grNT{rational}$
+$\grNT{decimal}$, $\grNT{nonpositive\_decimal}$.
+
+To check the unsatisfiability of the negation of $\varphi_1\lor \dots
+\lor \varphi_o$ one performs the following steps for each literal. For
+each $i$, let $\varphi := \varphi_i$ and $a := a_i$.
+
+\begin{enumerate}
+    \item If $\varphi = s_1 > s_2$, then let $\varphi := s_1 \leq s_2$.
+      If $\varphi = s_1 \geq s_2$, then let $\varphi := s_1 < s_2$.
+      If $\varphi = s_1 < s_2$, then let $\varphi := s_1 \geq s_2$.
+      If $\varphi = s_1 \leq s_2$, then let $\varphi := s_1 > s_2$. This negates
+      the literal.
+     \item If $\varphi = \neg (s_1 \bowtie s_2)$, then let $\varphi := s_1 \bowtie s_2$.
+    \item Replace $\varphi$ by $\sum_{i=0}^{n}c_i\times{}t_i - \sum_{i=n+1}^{m} c_i\times{}t_i
+    \bowtie d$ where $d := d_2 - d_1$.
+    \item \label{la_generic:str}Now $\varphi$ has the form $s_1 \bowtie d$. If all
+    variables in $s_1$ are integer sorted: replace $\bowtie d$ according to
+    the table below.
+    \item If $\bowtie$ is $≈$ replace $l$ by
+    $\sum_{i=0}^{m}a\times{}c_i\times{}t_i ≈ a\times{}d$, otherwise replace it by
+    $\sum_{i=0}^{m}|a|\times{}c_i\times{}t_i ≈ |a|\times{}d$.
+\end{enumerate}
+
+The replacements that can be performed by step~\ref{la_generic:str} above
+are
+
+\begin{tabular}{r l l}
+$\bowtie$  & If $d$ is an integer  & Otherwise \\
+$>$        & $\geq d + 1$  & $\geq \lfloor d\rfloor + 1$  \\
+$\geq$     & $\geq d$      & $\geq \lfloor d\rfloor + 1$  \\
+\end{tabular}
+
+Finally, the sum of the resulting literals is trivially contradictory.
+The sum
+\[
+    \sum_{k=1}^{o}\sum_{i=1}^{m^o}c_i^k*t_i^k \bowtie \sum_{k=1}^{o}d^k
+\]
+where $c_i^k$ is the constant $c_i$ of literal $l_k$, $t_i^k$ is the term
+$t_i$ of $l_k$, and $d^k$ is the constant $d$ of $l_k$. The operator
+$\bowtie$ is $≈$ if all operators are $≈$, $>$ if all are
+either $≈$ or $>$, and $\geq$ otherwise. The $a_i$ must be such
+that the sum on the left-hand side is $0$ and the right-hand side is $>0$ (or
+$\geq 0$ if $\bowtie$ is $>$).
+\end{RuleDescription}
+
+% Just like in ConTeX we can't have minted in the rule environment for some
+% reason.
+\begin{RuleExample}
+A simple \proofRule{la_generic} step in the logic \textsf{LRA} might look like this:
+
+\begin{AletheVerb}
+(step t10 (cl (not (> (f a) (f b))) (not (= (f a) (f b))))
+    :rule la_generic :args (1.0 -1.0))
+\end{AletheVerb}
+
+To verify this we have to check the insatisfiability of $(f\,a) > (f\,b) \land
+(f\,a) ≈ (f\,b)$ (step 2). After step~3 we get $(f\,a) - (f\,b) > 0 \land
+(f\,a) - (f\,b) ≈ 0$. Since we don't have an integer sort in this logic step~4 does
+not apply. Finally, after step~5 the conjunction is $(f\,a) - (f\,b) > 0 \land
+- (f\,a) + (f\,b) ≈ 0$. This sums to $0 > 0$, which is a contradiction.
+\end{RuleExample}
+
+\begin{RuleExample}
+The following \proofRule{la_generic} step is from a \textsf{QF\_UFLIA} problem:
+\begin{AletheVerb}
+(step t11 (cl (not (<= f3 0)) (<= (+ 1 (* 4 f3)) 1))
+    :rule la_generic :args (1.0 1/4))
+\end{AletheVerb}
+After normalization we get $-f_3 \geq 0 \land 4\times f_3 > 0$.
+This time step~4 applies and we can strengthen this to
+$-f_3 \geq 0 \land 4\times f_3 \geq 1$ and after multiplication we get
+$-f_3 \geq 0 \land f_3 \geq ¼$. Which sums to the contradiction
+$¼ \geq 0$.
+\end{RuleExample}
+
+\begin{RuleDescription}{lia_generic}
+This rule is a placeholder rule for integer arithmetic solving. It takes the
+same form as \proofRule{la_generic}, without the additional arguments.
+
+\begin{AletheX}
+$i$. & \ctxsep & $\varphi_1$, \dots , $\varphi_o$  & (\currule) \\
+\end{AletheX}
+with $\varphi_i$ being linear inequalities. The disjunction
+$\varphi_1\lor \dots \lor \varphi_n$ is a tautology in the theory of linear
+integer arithmetic.
+
+\ruleparagraph{Remark.} Since this rule can introduce a disjunction of arbitrary
+linear integer inequalities without any additional hints, proof checking
+can be NP-hard. Hence, this rule should be avoided when possible.
+
+\end{RuleDescription}
+
+\begin{RuleDescription}{la_disequality}
+\begin{AletheX}
+$i$. & \ctxsep  &
+$t_1 ≈ t_2 \lor \neg (t_1 \leq t_2) \lor \neg (t_2 \leq t_1)$
+& (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{la_totality}
+\begin{AletheX}
+$i$. & \ctxsep & $t_1 \leq t_2 \lor t_2 \leq t_1$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{la_tautology}
+This rule is a linear arithmetic tautology which can be checked without
+sophisticated reasoning. It has either the form
+
+\begin{AletheX}
+$i$. & \ctxsep & $\varphi$  & (\currule) \\
+\end{AletheX}
+where $\varphi$ is either a linear inequality $s_1 \bowtie s_2$
+or $\neg(s_1 \bowtie s_2)$. After performing step 1 to 3 of the process for
+checking the \proofRule{la_generic} the result is trivially unsatisfiable.
+
+The second form handles bounds on linear combinations. It is binary clause:
+
+\begin{AletheX}
+$i$. & \ctxsep &
+$\varphi_1 \lor \varphi_2$ % Checked: this is a proper disjunction not a cl
+ & (\currule) \\
+\end{AletheX}
+
+It can be checked by using the procedure for \proofRule{la_generic}
+while setting the arguments to $1$. Informally, the rule follows one of several
+cases:
+\begin{itemize}
+    \item $\neg (s_1 \leq d_1) \lor s_1 \leq d_2$ where $d_1 \leq d_2$
+    \item $s_1 \leq d_1 \lor \neg (s_1 \leq d_2)$ where $d_1 = d_2$
+    \item $\neg (s_1 \geq d_1) \lor s_1 \geq d_2$ where $d_1 \geq d_2$
+    \item $s_1 \geq d_1 \lor \neg (s_1 \geq d_2)$ where $d_1 = d_2$
+    \item $\neg (s_1 \leq d_1) \lor \neg(s_1 \geq d_2)$ where $d_1 < d_2$
+\end{itemize}
+The inequalities $s_1 \bowtie d$ are the result of applying normalization
+as for the rule \proofRule{la_generic}.
+\end{RuleDescription}
+
+\begin{RuleDescription}{la_mult_pos}
+
+Either of the form:
+
+  \begin{AletheX}
+    $i$. & \ctxsep  &
+     $(t_1 > 0 \wedge t_2 \bowtie t_3) \to t_1 * t_2 \bowtie t_1 * t_3$
+    & (\currule) \\
+  \end{AletheX}
+
+with $\bowtie \in \{<,>, \le,\ge, ≈\}$.\\
+
+\noindent Or of the form:
+
+\begin{AletheX}
+  $i$. & \ctxsep  &
+  $(t_1 > 0 \land \neg (t_2 ≈ t_3)) \rightarrow \neg (t_1 * t_2 ≈ t_1 * t_3)$ 
+  & (\currule) \\
+\end{AletheX}
+
+\end{RuleDescription}
+
+\begin{RuleDescription}{la_mult_neg}
+
+Either of the form:
+
+  \begin{AletheX}
+    $i$. & \ctxsep  &
+    $(t_1 < 0 \land t_2 \bowtie t_3) \rightarrow t_1 * t_2 \bowtie_{inv} t_1 * t_3$
+    & (\currule) \\
+  \end{AletheX}
+
+  with $\bowtie \in \{<,>, \le,\ge, ≈\}$ and $\bowtie_{inv}$ being defined according to the following table.
+
+  \begin{center}
+  \begin{tabular}{|c | c|}
+  \hline
+  $\bowtie$ & $\bowtie_{inv}$ is defined as: \\
+  \hline
+  $ < $ & $ > $ \\
+  $ \le $ & $ \ge $ \\
+  $ ≈ $ & $ ≈ $ \\
+  $ > $ & $ < $ \\
+  $ \ge $ & $ \le $ \\
+  \hline
+  \end{tabular}
+  \end{center}
+
+\noindent Or of the form:
+
+  \begin{AletheX}
+    $i$. & \ctxsep  &
+    $(t_1 < 0 \land \neg (t_2 ≈ t_3)) \rightarrow \neg (t_1 * t_2 ≈ t_1 * t_3)$
+    & (\currule) \\
+  \end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{bind}
+  The \currule{} rule is used to rename bound variables.
+
+\begin{AletheXS}
+\aletheLineSB
+$j$. & \spctx{ $\Gamma, y_1,\dots, y_n,  x_1 \mapsto y_1, \dots ,  x_n \mapsto y_n$}
+   & \ctxsep & $\varphi ≈ \varphi'$ & ($\dots$) \\
+   \spsep
+$k$. & $\Gamma$ & \ctxsep &
+    $Q x_1, \dots, x_n.\varphi ≈ Q y_1, \dots, y_n. \varphi'$
+     & \currule{} \\
+\end{AletheXS}
+
+\noindent
+where $Q \in \{\forall, \exists\}$,
+and the variables $y_1, \dots, y_n$ are neither free in $Q x_1,
+\dots, x_n.\varphi$ nor occur in $\Gamma$.
+\end{RuleDescription}
+
+\begin{RuleDescription}{sko_ex}
+The \currule{} rule skolemizes existential quantifiers.
+
+\begin{AletheXS}
+\aletheLineS
+$j$. &
+\spctx{$\Gamma, x_1 \mapsto \varepsilon_1, \dots ,  x_n \mapsto \varepsilon_n$}
+   & \ctxsep &  $\varphi ≈ \psi$ & ($\dots$) \\
+   \spsep
+$k$. & $\Gamma$ & \ctxsep & $\exists x_1, \dots, x_n.\varphi ≈ \psi$ & \currule{} \\
+\end{AletheXS}
+
+\noindent
+where $\varepsilon_i$ stands for $\varepsilon x_i. (\exists x_{i+1}, \dots,
+x_n. \varphi)$.
+\end{RuleDescription}
+
+\begin{RuleDescription}{sko_forall}
+The \currule{} rule skolemizes universal quantifiers.
+
+\begin{AletheXS}
+\aletheLineS
+$j$. &
+\spctx{$\Gamma, x_1 \mapsto (\varepsilon x_1.\neg\varphi), \dots,  x_n \mapsto (\varepsilon x_n.\neg\varphi)$}
+   & \ctxsep & $\varphi ≈ \psi$ & ($\dots$) \\
+ \spsep
+$k$. & $\Gamma$ & \ctxsep  & $\forall x_1, \dots, x_n.\varphi ≈ \psi$ & \currule{} \\
+\end{AletheXS}
+
+\end{RuleDescription}
+
+\begin{RuleDescription}{forall_inst}
+\begin{AletheX}
+$i$. & \ctxsep &
+$\neg (\forall x_1, \dots, x_n. P) \lor P[x_1\mapsto t_1]\dots[x_n\mapsto t_n]$
+ & \currule\, [$t_1$, $\dots$, $t_n$] \\
+\end{AletheX}
+
+\noindent
+where $x_i$ and $t_i$ have the same sort.
+\end{RuleDescription}
+
+\begin{RuleExample}
+An application of the \proofRule{forall_inst} rule.
+\begin{AletheVerb}
+(step t16 (cl (or (not (forall ((x S) (y T)) (P y x    )))
+                                             (P b (f a))
+      :rule forall_inst :args ((f a) b)
+\end{AletheVerb}
+\end{RuleExample}
+
+
+\begin{RuleDescription}{refl}
+\begin{AletheXS}
+$j$. & \ctxsep  & $\Gamma$  & $t_1 ≈ t_2 $ & \currule \\
+\end{AletheXS}
+
+\noindent
+where, if $\sigma = \subst(\Gamma)$,
+the terms $t_1\sigma$ and $t_2$ are
+syntactically equal up to  renaming of
+bound variables and the orientation of equalities.
+
+\ruleparagraph{Remark.} This is the only rule that requires the application of
+the context.
+\end{RuleDescription}
+
+\begin{RuleDescription}{trans}
+\begin{AletheXS}
+$i_1$. & \ctxsep  & $\Gamma$  & $t_1 ≈ t_2 $ & ($\dots$) \\
+$i_2$. & \ctxsep  & $\Gamma$  & $t_2 ≈ t_3 $ & ($\dots$) \\
+\aletheLineS
+$i_n$. & \ctxsep  & $\Gamma$  & $t_n ≈ t_{n+1} $ & ($\dots$) \\
+$j$. & \ctxsep  & $\Gamma$  & $t_1 ≈ t_{n+1}$ & (\currule\; $i_1$, $\dots$, $i_n$) \\
+\end{AletheXS}
+\end{RuleDescription}
+
+\begin{RuleDescription}{cong}
+\begin{AletheXS}
+$i_1$. & \ctxsep  & $\Gamma$  & $t_1 ≈ u_1$ & ($\dots$) \\
+$i_2$. & \ctxsep  & $\Gamma$  & $t_2 ≈ u_2 $ & ($\dots$) \\
+\aletheLineS
+$i_n$. & \ctxsep  & $\Gamma$  & $t_n ≈ u_n $ & ($\dots$) \\
+$j$. & \ctxsep  & $\Gamma$  & $(f\,t_1\,\cdots\,t_n) ≈ (f\,u_1\,\cdots\,u_n)$  & (\currule\; $i_1$, $\dots$, $i_n$) \\
+\end{AletheXS}
+where $f$ is any function symbol of appropriate sort.
+\end{RuleDescription}
+
+\begin{RuleDescription}{eq_reflexive}
+\begin{AletheX}
+$i$. & \ctxsep  & $t ≈ t$  & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{eq_transitive}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (t_1 ≈ t_2)$, $\dots$ , $\neg (t_{n-1} ≈ t_n)$,
+$t_1 ≈ t_n$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{eq_congruent}
+\begin{AletheX}
+$i$. & \ctxsep &
+$\neg (t_1 ≈ u_1)$, $\dots$ ,$\neg (t_n ≈ u_n)$,
+$(f\,t_1\, \cdots\,t_n) ≈ (f\,u_1\, \cdots\,u_n)$
+ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{eq_congruent_pred}
+\begin{AletheX}
+
+$i$. & \ctxsep     &
+$\neg (t_1 ≈ u_1)$, \dots ,$\neg (t_n ≈ u_n)$,
+$(P\,t_1\, \cdots\,t_n) ≈ (P\,u_1\, \cdots\,u_n)$
+ & \currule \\
+\end{AletheX}
+where $P$\, is a function symbol with co-domain sort $\lsymb{Bool}$.
+\end{RuleDescription}
+
+\begin{RuleDescription}{qnt_cnf}
+\begin{AletheX}
+$i$. & \ctxsep &
+$\neg(\forall x_1, \dots, x_n. \varphi) \lor \forall x_{k_1}, \dots, x_{k_m}.\varphi'$
+ & \currule \\
+\end{AletheX}
+
+This rule expresses clausification of a term under a universal
+quantifier. This is used by conflicting instantiation. $\varphi'$ is one of the clause
+of the clause normal form of $\varphi$. The variables $x_{k_1}, \dots, x_{k_m}$ are
+a permutation of $x_1, \dots, x_n$ plus additional variables added by prenexing
+$\varphi$. Normalization is performed in two phases. First, the negative normal form
+is formed, then the result is prenexed. The result of the first step is $\Phi(\varphi, 1)$
+where:
+
+\begin{align*}
+\Phi(\neg \varphi, 1) &:= \Phi(\varphi, 0) \\
+\Phi(\neg \varphi, 0) &:= \Phi(\varphi, 1) \\
+\Phi(\varphi_1 \lor\dots\lor\varphi_n, 1) &:= \Phi(\varphi_1, 1)\lor\dots\lor\Phi(\varphi_n, 1) \\
+\Phi(\varphi_1 \land\dots\land\varphi_n, 1) &:= \Phi(\varphi_1, 1)\land\dots\land\Phi(\varphi_n, 1) \\
+\Phi(\varphi_1 \lor\dots\lor\varphi_n, 0) &:= \Phi(\varphi_1, 0)\land\dots\land\Phi(\varphi_n, 0) \\
+\Phi(\varphi_1 \land\dots\land\varphi_n, 0) &:= \Phi(\varphi_1, 0)\lor\dots\lor\Phi(\varphi_n, 0) \\
+\Phi(\varphi_1 \rightarrow \varphi_2, 1) &:= (\Phi(\varphi_1, 0) \lor \Phi(\varphi_2, 1)) \land
+                                                    (\Phi(\varphi_2, 0) \lor \Phi(\varphi_1, 1)) \\
+\Phi(\varphi_1 \rightarrow \varphi_2, 0) &:= (\Phi(\varphi_1, 1) \land \Phi(\varphi_2, 0)) \lor
+                                                    (\Phi(\varphi_2, 1) \land \Phi(\varphi_1, 0)) \\
+\Phi(\lsymb{ite}\,\varphi_1\,\varphi_2\,\varphi_3, 1) &:=
+             (\Phi(\varphi_1, 0) \lor \Phi(\varphi_2, 1)) \land (\Phi(\varphi_1, 1) \lor \Phi(\varphi_3, 1)) \\
+\Phi(\lsymb{ite}\,\varphi_1\,\varphi_2\,\varphi_3, 0) &:=
+             (\Phi(\varphi_1, 1) \land \Phi(\varphi_2, 0)) \lor (\Phi(\varphi_1, 0) \land \Phi(\varphi_3, 0)) \\
+\Phi(\forall x_1, \dots, x_n. \varphi, 1) &:= \forall x_1, \dots, x_n. \Phi(\varphi, 1) \\
+\Phi(\exists x_1, \dots, x_n. \varphi, 1) &:= \exists x_1, \dots, x_n. \Phi(\varphi, 1) \\
+\Phi(\forall x_1, \dots, x_n. \varphi, 0) &:= \exists x_1, \dots, x_n. \Phi(\varphi, 0) \\
+\Phi(\exists x_1, \dots, x_n. \varphi, 0) &:= \forall x_1, \dots, x_n. \Phi(\varphi, 0) \\
+\Phi(\varphi, 1) &:= \varphi \\
+\Phi(\varphi, 0) &:= \neg\varphi
+\end{align*}
+
+\ruleparagraph{Remark.} This is a placeholder rule that combines the many steps
+done during clausification.
+\end{RuleDescription}
+
+\begin{RuleDescription}{and}
+\begin{AletheX}
+$i$. & \ctxsep & $\varphi_1 \land \cdots \land \varphi_n$ & ($\dots$) \\
+$j$. & \ctxsep & $\varphi_k$ & (\currule\;$i$)\, k\\
+\end{AletheX}
+and $1 \leq k \leq n$.
+\end{RuleDescription}
+
+\begin{RuleDescription}{not_or}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (\varphi_1 \lor \cdots \lor \varphi_n)$ & ($\dots$) \\
+$j$. & \ctxsep & $\neg \varphi_k$  & (\currule\;$i$)\, k\\
+\end{AletheX}
+and $1 \leq k \leq n$.
+\end{RuleDescription}
+
+\begin{RuleDescription}{or}
+\begin{AletheX}
+$i$. & \ctxsep &
+$\varphi_1 \lor \cdots \lor \varphi_n$ & ($\dots$) \\
+$j$. & \ctxsep & $\varphi_1, \dots, \varphi_n$ & (\currule\;$i$) \\
+\end{AletheX}
+
+\ruleparagraph{Remark.} This rule deconstructs the \inlineAlethe{or} operator
+into a clause denoted by \inlineAlethe{cl}.
+\end{RuleDescription}
+
+\begin{RuleExample}
+An application of the \proofRule{or} rule.
+\begin{AletheVerb}
+(step t15 (cl (or (= a b) (not (<= a b)) (not (<= b a))))
+    :rule la_disequality)
+(step t16 (cl     (= a b) (not (<= a b)) (not (<= b a)))
+     :rule or :premises (t15))
+\end{AletheVerb}
+\end{RuleExample}
+
+\begin{RuleDescription}{weakening}
+\begin{AletheX}
+$i$. & \ctxsep &
+$\varphi_1, \cdots, \varphi_n$ & ($\dots$) \\
+$j$. & \ctxsep & $\varphi_1, \cdots, \varphi_n, \psi_1, \dots, \psi_m$ & (\currule\;$i$) \\
+\end{AletheX}
+where $m \geq 1$.
+\end{RuleDescription}
+
+\begin{RuleDescription}{reordering}
+\begin{AletheX}
+$i$. & \ctxsep & $\varphi_1, \cdots, \varphi_n$ & ($\dots$) \\
+$j$. & \ctxsep & $\psi_1, \cdots, \psi_n$ & (\currule\;$i$) \\
+\end{AletheX}
+where the multisets $\{\varphi_1, \cdots, \varphi_n\}$ and $\{\psi_1, \cdots, \psi_n\}$
+are the same.  That is, the conclusion of the rule is a reordering of the
+literals in the premise.
+\end{RuleDescription}
+
+\begin{RuleDescription}{not_and}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (\varphi_1 \land \dots \land \varphi_n)$ & ($\dots$) \\
+$j$. & \ctxsep & $\neg\varphi_1 , \dots , \neg\varphi_n$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{xor1}
+\begin{AletheX}
+$i$. & \ctxsep & ($\lsymb{xor}\,\varphi_1\,\varphi_2$)
+ & ($\dots$) \\
+$j$. & \ctxsep & $\varphi_1, \varphi_2$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{xor2}
+\begin{AletheX}
+$i$. & \ctxsep & ($\lsymb{xor}\,\varphi_1\,\varphi_2$) & ($\dots$) \\
+$j$. & \ctxsep & $\neg\varphi_1 , \neg\varphi_2$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{not_xor1}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg(\lsymb{xor}\,\varphi_1\,\varphi_2)$ & ($\dots$) \\
+$j$. & \ctxsep & $\varphi_1 , \neg\varphi_2$  & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{not_xor2}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg(\lsymb{xor}\,\varphi_1\,\varphi_2)$ & ($\dots$) \\
+$j$. & \ctxsep & $\neg\varphi_1 , \varphi_2$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{implies}
+\begin{AletheX}
+$i$. & \ctxsep & $\varphi_1\rightarrow\varphi_2$ & ($\dots$) \\
+$j$. & \ctxsep & $\neg\varphi_1, \varphi_2$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{not_implies1}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (\varphi_1\rightarrow\varphi_2)$ & ($\dots$) \\
+$j$. & \ctxsep & $\varphi_1$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{not_implies2}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (\varphi_1\rightarrow\varphi_2)$ & ($\dots$) \\
+$j$. & \ctxsep & $\neg\varphi_2$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{equiv1}
+\begin{AletheX}
+$i$. & \ctxsep & $\varphi_1≈\varphi_2$ & ($\dots$) \\
+$j$. & \ctxsep & $\neg\varphi_1, \varphi_2$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{equiv2}
+\begin{AletheX}
+$i$. & \ctxsep & $\varphi_1≈\varphi_2$ & ($\dots$) \\
+$j$. & \ctxsep & $\varphi_1, \neg\varphi_2$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{not_equiv1}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg(\varphi_1≈\varphi_2)$ & ($\dots$) \\
+$j$. & \ctxsep & $\varphi_1 , \varphi_2$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{not_equiv2}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg(\varphi_1≈\varphi_2)$ & ($\dots$) \\
+$j$. & \ctxsep & $\neg\varphi_1, \neg\varphi_2$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{and_pos}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (\varphi_1 \land \cdots \land \varphi_n) , \varphi_k$ &
+  \currule\, k\\
+\end{AletheX}
+with $1 \leq k \leq n$.
+\end{RuleDescription}
+
+\begin{RuleDescription}{and_neg}
+\begin{AletheX}
+$i$. & \ctxsep & $(\varphi_1 \land \cdots \land \varphi_n), \neg\varphi_1, \dots , \neg\varphi_n$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{or_pos}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (\varphi_1 \lor \cdots \lor \varphi_n) , \varphi_1 , \dots, \varphi_n$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{or_neg}
+\begin{AletheX}
+$i$. & \ctxsep & $(\varphi_1 \lor \cdots \lor \varphi_n), \neg \varphi_k$ &
+  \currule\, k\\
+\end{AletheX}
+with $1 \leq k \leq n$.
+\end{RuleDescription}
+
+\begin{RuleDescription}{xor_pos1}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (\lsymb{xor}\,\varphi_1\,\varphi_2) , \varphi_1 , \varphi_2$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{xor_pos2}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (\lsymb{xor}\,\varphi_1\,\varphi_2), \neg \varphi_1, \neg \varphi_2$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{xor_neg1}
+\begin{AletheX}
+$i$. & \ctxsep & $(\lsymb{xor}\,\varphi_1\,\varphi_2), \varphi_1 , \neg \varphi_2$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{xor_neg2}
+\begin{AletheX}
+$i$. & \ctxsep & $(\lsymb{xor}\,\varphi_1\,\varphi_2), \neg \varphi_1, \varphi_2$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{implies_pos}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (\varphi_1 \rightarrow \varphi_2), \neg \varphi_1 , \varphi_2$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{implies_neg1}
+\begin{AletheX}
+$i$. & \ctxsep & $\varphi_1 \rightarrow \varphi_2, \varphi_1$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{implies_neg2}
+\begin{AletheX}
+$i$. & \ctxsep & $\varphi_1 \rightarrow \varphi_2, \neg \varphi_2$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{equiv_pos1}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (\varphi_1 ≈ \varphi_2), \varphi_1, \neg \varphi_2$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{equiv_pos2}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (\varphi_1 ≈ \varphi_2), \neg \varphi_1, \varphi_2$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{equiv_neg1}
+\begin{AletheX}
+$i$. & \ctxsep & $\varphi_1 ≈ \varphi_2, \neg \varphi_1, \neg \varphi_2$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{equiv_neg2}
+\begin{AletheX}
+$i$. & \ctxsep & $\varphi_1 ≈ \varphi_2, \varphi_1, \varphi_2$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{ite1}
+\begin{AletheX}
+$i$. & \ctxsep & $(\lsymb{ite}\,\varphi_1\,\varphi_2\,\varphi_3)$ & ($\dots$) \\
+$j$. & \ctxsep & $\varphi_1 , \varphi_3$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{ite2}
+\begin{AletheX}
+$i$. & \ctxsep & $(\lsymb{ite}\,\varphi_1\,\varphi_2\,\varphi_3)$ & ($\dots$) \\
+$j$. & \ctxsep & $\neg\varphi_1, \varphi_2$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{ite_pos1}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (\lsymb{ite}\,\varphi_1\,\varphi_2\,\varphi_3), \varphi_1, \varphi_3$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{ite_pos2}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg (\lsymb{ite}\,\varphi_1\,\varphi_2\,\varphi_3), \neg \varphi_1, \varphi_2$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{ite_neg1}
+\begin{AletheX}
+$i$. & \ctxsep & $(\lsymb{ite}\,\varphi_1\,\varphi_2\,\varphi_3, \varphi_1, \neg \varphi_3)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{ite_neg2}
+\begin{AletheX}
+$i$. & \ctxsep & $(\lsymb{ite}\,\varphi_1\,\varphi_2\,\varphi_3, \neg \varphi_1, \neg \varphi_2)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{not_ite1}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg(\lsymb{ite}\,\varphi_1\,\varphi_2\,\varphi_3)$ & ($\dots$) \\
+$j$. & \ctxsep & $\varphi_1, \neg\varphi_3$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{not_ite2}
+\begin{AletheX}
+$i$. & \ctxsep & $\neg(\lsymb{ite}\,\varphi_1\,\varphi_2\,\varphi_3)$ & ($\dots$) \\
+$j$. & \ctxsep & $\neg\varphi_1 , \neg\varphi_2$ & (\currule\;$i$) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{connective_def}
+  This rule is used to replace connectives by their definition. It can be one
+  of the following:
+\begin{AletheXS}
+$i$. & \ctxsep  & $\Gamma$  &
+    $(\lsymb{xor}\,\varphi_1\,\varphi_2) ≈
+    ((\neg\varphi_1 \land \varphi_2) \lor (\varphi_1 \land \neg\varphi_2))$ & \currule \\
+\end{AletheXS}
+
+\begin{AletheXS}
+$i$. & \ctxsep  & $\Gamma$  &
+      $(\varphi_1 ≈ \varphi_2) ≈
+      ((\varphi_1 \rightarrow \varphi_2) \land (\varphi_2 \rightarrow \varphi_1))$ & \currule \\
+\end{AletheXS}
+
+\begin{AletheXS}
+$i$. & \ctxsep  & $\Gamma$  &
+      $(\lsymb{ite}\,\varphi_1\,\varphi_2\,\varphi_3) ≈
+      ((\varphi_1 \rightarrow \varphi_2) \land (\neg\varphi_1 \rightarrow \varphi_3))$ & \currule \\
+\end{AletheXS}
+
+\begin{AletheXS}
+$i$. & \ctxsep  & $\Gamma$  &
+      $(\forall x_1, \dots, x_n.\,\varphi) ≈ \neg(\exists x_1, \dots, x_n.\,
+      \neg\varphi)$ & \currule \\
+\end{AletheXS}
+\end{RuleDescription}
+
+\begin{RuleDescription}{and_simplify}
+This rule simplifies an $\land$ term by applying equivalence-preserving
+transformations until a fixed point is reached. Hence, the general form is
+
+\begin{AletheXS}
+$i$. & \ctxsep  & $\Gamma$  & $\varphi_1\land \cdots\land\varphi_n ≈ \psi$ & \currule \\
+\end{AletheXS}
+where $\psi$ is the transformed term.
+
+The possible transformations are:
+\begin{itemize}
+    \item $\top \land \cdots \land \top ⇒ \top$
+    \item $\varphi_1 \land \cdots \land \varphi_n ⇒ \varphi_1
+    \land \cdots \land \varphi_{n'} $ where the right-hand side has all
+    $\top$ literals removed.
+    \item $\varphi_1 \land \cdots \land \varphi_n ⇒ \varphi_1
+    \land \cdots \land \varphi_{n'} $ where the right-hand side has all
+    repeated literals removed.
+    \item $\varphi_1 \land\cdots\land \bot\land\cdots \land \varphi_n ⇒ \bot$
+    \item $\varphi_1 \land\cdots\land \varphi_i\land \cdots \land \varphi_j\land\cdots \land \varphi_n ⇒ \bot$
+  and $\varphi_i$, $\varphi_j$ are such that
+  \begin{align*}
+  \varphi_i &= \underbrace{\neg \dots \neg}_n \psi \\
+  \varphi_j &= \underbrace{\neg \dots \neg}_m \psi
+  \end{align*}
+  and one of $n, m$ is odd and the other even.  Either can be $0$.
+\end{itemize}
+\end{RuleDescription}
+
+\begin{RuleDescription}{or_simplify}
+This rule simplifies an $\lor$ term by applying equivalence-preserving
+transformations until a fixed point is reached. Hence, the general form is
+
+\begin{AletheXS}
+$i$. & \ctxsep  & $\Gamma$  & $(\varphi_1\lor \cdots\lor\varphi_n) ≈ \psi$ & \currule \\
+\end{AletheXS}
+where $\psi$ is the transformed term.
+
+The possible transformations are:
+\begin{itemize}
+    \item $\bot \lor \cdots \lor \bot ⇒ \bot$
+    \item $\varphi_1 \lor \cdots \lor \varphi_n ⇒ \varphi_1
+    \lor \cdots \lor \varphi_{n'} $ where the right-hand side has all
+    $\bot$ literals removed.
+    \item $\varphi_1 \lor \cdots \lor \varphi_n ⇒ \varphi_1
+    \lor \cdots \lor \varphi_{n'} $ where the right-hand side has all
+    repeated literals removed.
+    \item $\varphi_1 \lor\cdots\lor \top\lor\cdots \lor \varphi_n ⇒ \top$
+    \item $\varphi_1 \lor\cdots\lor \varphi_i\lor \cdots \lor \varphi_j\lor\cdots \lor \varphi_n ⇒ \top$
+  and $\varphi_i$, $\varphi_j$ are such that
+  \begin{align*}
+  \varphi_i &= \underbrace{\neg \dots \neg}_n \psi \\
+  \varphi_j &= \underbrace{\neg \dots \neg}_m \psi
+  \end{align*}
+  and one of $n, m$ is odd and the other even.  Either can be $0$.
+\end{itemize}
+\end{RuleDescription}
+
+\begin{RuleDescription}{not_simplify}
+This rule simplifies an $\neg$ term by applying equivalence-preserving
+transformations until a fixed point is reached. Hence, the general form is
+
+\begin{AletheXS}
+$i$. & \ctxsep  & $\Gamma$ & $\neg\varphi ≈ \psi$ & \currule \\
+\end{AletheXS}
+where $\psi$ is the transformed term.
+
+The possible transformations are:
+\begin{itemize}
+    \item $\neg (\neg \varphi) ⇒ \varphi$
+    \item $\neg \bot ⇒ \top$
+    \item $\neg \top ⇒ \bot$
+\end{itemize}
+\end{RuleDescription}
+
+\begin{RuleDescription}{implies_simplify}
+This rule simplifies an $\rightarrow$ term by applying equivalence-preserving
+transformations until a fixed point is reached. Hence, the general form is
+
+\begin{AletheXS}
+$i$. & \ctxsep  & $\Gamma$ & $\varphi_1\rightarrow \varphi_2 ≈ \psi$ & \currule \\
+\end{AletheXS}
+where $\psi$ is the transformed term.
+
+The possible transformations are:
+\begin{itemize}
+    \item $\neg \varphi_1 \rightarrow \neg \varphi_2 ⇒  \varphi_2\rightarrow \varphi_1$
+    \item $\bot \rightarrow  \varphi ⇒ \top$
+    \item $ \varphi \rightarrow \top ⇒ \top$
+    \item $\top \rightarrow  \varphi ⇒  \varphi$
+    \item $ \varphi \rightarrow \bot ⇒ \neg \varphi$
+    \item $ \varphi \rightarrow  \varphi ⇒ \top$
+    \item $\neg \varphi \rightarrow  \varphi ⇒  \varphi$
+    \item $ \varphi \rightarrow \neg \varphi ⇒ \neg \varphi$
+\end{itemize}
+\end{RuleDescription}
+
+\begin{RuleDescription}{equiv_simplify}
+This rule simplifies a formula with the head symbol $≈\,: \lsymb{Bool}\,\lsymb{Bool}\,\lsymb{Bool}$
+by applying equivalence-preserving
+transformations until a fixed point is reached. Hence, the general form is
+
+\begin{AletheXS}
+$i$. & \ctxsep  & $\Gamma$ & $(\varphi_1≈ \varphi_2) ≈ \psi$ & \currule \\
+\end{AletheXS}
+where $\psi$ is the transformed term.
+
+The possible transformations are:
+\begin{itemize}
+    \item $(\neg \varphi_1 ≈ \neg \varphi_2) ⇒ ( \varphi_1≈ \varphi_2)$
+    \item $( \varphi≈ \varphi) ⇒ \top$
+    \item $( \varphi≈ \neg \varphi) ⇒ \bot$
+    \item $(\neg \varphi≈  \varphi) ⇒ \bot$
+    \item $(\top ≈  \varphi) ⇒  \varphi$
+    \item $( \varphi ≈ \top) ⇒  \varphi$
+    \item $(\bot ≈  \varphi) ⇒ \neg \varphi$
+    \item $( \varphi ≈ \bot) ⇒ \neg \varphi$
+\end{itemize}
+\end{RuleDescription}
+
+\begin{RuleDescription}{bool_simplify}
+This rule simplifies a boolean term by applying equivalence-preserving
+transformations until a fixed point is reached. Hence, the general form is
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $\varphi≈ \psi$ & \currule \\
+\end{AletheXS}
+where $\psi$ is the transformed term.
+
+The possible transformations are:
+\begin{itemize}
+  \item $\neg(\varphi_1\rightarrow \varphi_2) ⇒ (\varphi_1 \land \neg \varphi_2)$
+  \item $\neg(\varphi_1\lor \varphi_2) ⇒ (\neg \varphi_1 \land \neg \varphi_2)$
+  \item $\neg(\varphi_1\land \varphi_2) ⇒ (\neg \varphi_1 \lor \neg \varphi_2)$
+  \item $(\varphi_1 \rightarrow (\varphi_2\rightarrow \varphi_3)) ⇒ (\varphi_1\land \varphi_2) \rightarrow \varphi_3$
+  \item $((\varphi_1\rightarrow \varphi_2)\rightarrow \varphi_2)  ⇒ (\varphi_1\lor \varphi_2)$
+  \item $(\varphi_1 \land (\varphi_1\rightarrow \varphi_2)) ⇒ (\varphi_1 \land \varphi_2)$
+  \item $((\varphi_1\rightarrow \varphi_2) \land \varphi_1) ⇒ (\varphi_1 \land \varphi_2)$
+\end{itemize}
+\end{RuleDescription}
+
+\begin{RuleDescription}{ac_simp}
+  This rule simplifies nested occurrences of $\lor$ or $\land$:
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $\psi ≈ \varphi_1 \circ\cdots\circ\varphi_n$ & \currule \\
+\end{AletheXS}
+  where $\circ \in \{\lor, \land\}$ and $\psi$ is a nested application of $\circ$.
+  The literals $\varphi_i$ are literals of the flattening of $\psi$ with duplicates
+  removed.
+\end{RuleDescription}
+
+\begin{RuleDescription}{ite_simplify}
+  This rule simplifies an if-then-else term by applying equivalence-preserving
+  transformations until fixed point\footnote{Note however that the order of the
+    application is important, since the set of rules is not confluent. For
+    example, the term $(\lsymb{ite} \top \; t_1 \; t_2 ≈
+    t_1)$ can be simplified into both $p$ and $(\neg (\neg p))$ depending on the
+    order of applications.}
+  %
+It has the form
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $(\lsymb{ite}\,\varphi\,t_1\,t_2) ≈ u$ & \currule \\
+\end{AletheXS}
+where $u$ is the transformed term.
+
+The possible transformations are:
+\begin{itemize}
+    \item $(\lsymb{ite}\, \top      \, t_1 \, t_2) ⇒ t_1$
+    \item $(\lsymb{ite}\, \bot      \, t_1 \, t_2) ⇒ t_2$
+    \item $(\lsymb{ite}\, \psi      \, t \, t) ⇒ t$
+    \item $(\lsymb{ite}\, \neg \varphi \, t_1 \, t_2) ⇒ (\lsymb{ite}\, \varphi \, t_2 \, t_1)$
+    \item $(\lsymb{ite}\, \psi \, (\lsymb{ite}\, \psi\,t_1\,t_2)\, t_3) ⇒
+      (\lsymb{ite}\, \psi\, t_1\, t_3)$
+    \item $(\lsymb{ite}\, \psi \, t_1\, (\lsymb{ite}\, \psi\,t_2\,t_3) ⇒
+      (\lsymb{ite}\, \psi\, t_1\, t_3)$
+    \item $(\lsymb{ite}\, \psi \, \top\, \bot) ⇒ \psi$
+    \item $(\lsymb{ite}\, \psi \, \bot\, \top) ⇒ \neg\psi$
+    \item $(\lsymb{ite}\, \psi \, \top \, \varphi) ⇒ \psi\lor\varphi$
+    \item $(\lsymb{ite}\, \psi \, \varphi\,\bot) ⇒ \psi\land\varphi$
+    \item $(\lsymb{ite}\, \psi \, \bot\, \varphi) ⇒ \neg\psi\land\varphi$
+    \item $(\lsymb{ite}\, \psi \, \varphi\,\top) ⇒ \neg\psi\lor\varphi$
+\end{itemize}
+\end{RuleDescription}
+
+\begin{RuleDescription}{qnt_simplify}
+  This rule simplifies a $\forall$-formula with a constant predicate.
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $(\forall x_1, \dots, x_n. \varphi) ≈ \varphi$ & \currule \\
+\end{AletheXS}
+  where $\varphi$ is either $\top$ or $\bot$.
+\end{RuleDescription}
+
+\begin{RuleDescription}{onepoint}
+The {\currule} rule is the ``one-point-rule''. That is: it eliminates quantified
+variables that can only have one value.
+
+\begin{AletheXS}
+\aletheLineS
+$j$. & \spctx{$\Gamma, x_{k_1},\dots, x_{k_m},  x_{j_1} \mapsto t_{j_1}, \dots ,  x_{j_o} \mapsto t_{j_o}$}
+   & \ctxsep & $\varphi ≈ \varphi'$ & ($\dots$) \\
+ \spsep
+$k$. & $\Gamma$ & \ctxsep  & $Q x_1, \dots, x_n.\varphi ≈ Q x_{k_1}, \dots, x_{k_m}. \varphi'$ & \currule{} \\
+\end{AletheXS}
+where $Q\in\{\forall, \exists\}$,  $n = m + o$,  $k_1, \dots, k_m$ and
+$j_1, \dots, j_o$ are monotone
+mappings to $1, \dots, n$, and no $x_{k_i}$ appears in $x_{j_1}, \dots, x_{j_o}$.
+
+The terms $t_{j_1}, \dots, t_{j_o}$ are the points of the variables
+$x_{j_1}, \dots, x_{j_o}$. Points are defined by equalities $x_i≈ t_i$
+with positive polarity in the term $\varphi$.
+
+\ruleparagraph{Remark.} Since an eliminated variable $x_i$ might appear free in a
+term $t_j$, it is necessary to replace $x_i$ with $t_i$ inside $t_j$. While
+this substitution is performed correctly, the proof for it is currently
+missing.
+\end{RuleDescription}
+
+\begin{RuleExample}
+An application of the \proofRule{onepoint} rule on the term $(\forall x, y.\, x ≈ y
+\rightarrow (f\,x)\land (f\,y))$ look like this:
+
+\begin{AletheVerb}
+(anchor :step t3 :args ((x S) (:= (y S) x)))
+(step t3.t1 (cl (= x y)) :rule refl)
+(step t3.t2 (cl (= (= x y) (= x x)))
+    :rule cong :premises (t3.t1))
+(step t3.t3 (cl (= x y)) :rule refl)
+(step t3.t4 (cl (= (f y) (f x)))
+    :rule cong :premises (t3.t3))
+(step t3.t5 (cl (= (and (f x) (f y)) (and (f x) (f x))))
+    :rule cong :premises (t3.t4))
+(step t3.t6 (cl (= (=> (= x y) (and (f x) (f y)))
+                   (=> (= x x) (and (f x) (f x)))))
+    :rule cong :premises (t3.t2 t3.t5))
+(step t3 (cl (=
+        (forall ((x S) (y S)) (=> (= x y) (and (f x) (f y))))
+        (forall ((x S))       (=> (= x x) (and (f x) (f x))))))
+    :rule onepoint)
+\end{AletheVerb}
+\end{RuleExample}
+
+\begin{RuleDescription}{qnt_join}
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $Q x_1, \dots, x_n.\,(Q x_{n+1}, \dots, x_{m}.\,\varphi)
+      ≈ Q x_{k_1}, \dots, x_{k_o}.\,\varphi$ & \currule \\
+\end{AletheXS}
+  where $m > n$ and $Q\in\{\forall, \exists\}$. Furthermore, $k_1, \dots, k_o$ is a monotonic
+  map to $1, \dots, m$ such that $x_{k_1}, \dots, x_{k_o}$ are pairwise
+  distinct, and $\{x_1, \dots, x_m\} = \{x_{k_1}, \dots, x_{k_o}\}$.
+\end{RuleDescription}
+
+\begin{RuleDescription}{qnt_rm_unused}
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $Q x_1, \dots, x_n.\,\varphi ≈ Q x_{k_1}, \dots, x_{k_m}.\,\varphi$
+ & \currule \\
+\end{AletheXS}
+  where $m \leq n$ and $Q\in\{\forall, \exists\}$. Furthermore, $k_1, \dots, k_m$ is
+  a monotonic map to $1, \dots, n$ and if $x\in \{x_j\; |\; j \in \{1, \dots,
+  n\} \land j\in\not \{k_1, \dots, k_m\}\}$ then $x$ is not free in $P$.
+\end{RuleDescription}
+
+\begin{RuleDescription}{eq_simplify}
+  This rule simplifies an $≈$ term by applying equivalence-preserving
+  transformations until a fixed point is reached. Hence, the general form is
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $(t_1≈ t_2) ≈ \varphi$ & \currule \\
+\end{AletheXS}
+  where $\psi$ is the transformed term.
+
+  The possible transformations are:
+  \begin{itemize}
+  \item $t ≈ t ⇒ \top$
+  \item $(t_1 ≈ t_2) ⇒ \bot$ if $t_1$ and $t_2$ are different numeric constants.
+  \item $\neg (t ≈ t) ⇒ \bot$ if $t$ is a numeric constant.
+  \end{itemize}
+\end{RuleDescription}
+
+\begin{RuleDescription}{div_simplify}
+This rule simplifies a division by applying equivalence-preserving
+transformations. The general form is
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $(t_1\, /\,  t_2) ⇒ t_3$ & \currule \\
+\end{AletheXS}
+The possible transformations are:
+\begin{itemize}
+  \item $t\, /\, t ⇒ 1$
+  \item $t\, /\, 1 ⇒ t$
+  \item $t_1\,  /\,  t_2 ⇒ t_3$
+    if $t_1$ and $t_2$ are constants and $t_3$ is $t_1$
+    divided by $t_2$ according to the semantics of the current theory.
+\end{itemize}
+\end{RuleDescription}
+
+\begin{RuleDescription}{prod_simplify}
+This rule simplifies a product by applying equivalence-preserving
+transformations until a fixed point is reached. The general form is
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $t_1\times\cdots\times t_n ≈ u$ & \currule \\
+\end{AletheXS}
+where $u$ is either a constant or a product.
+
+The possible transformations are:
+\begin{itemize}
+    \item $t_1\times\cdots\times t_n ⇒ u$ where all
+    $t_i$ are constants and $u$ is their product.
+    \item $t_1\times\cdots\times t_n ⇒ 0$ if any
+    $t_i$ is $0$.
+    \item $t_1\times\cdots\times t_n ⇒
+      c \times t_{k_1}\times\cdots\times t_{k_n}$ where $c$
+      is the product of the constants of $t_1, \dots, t_n$ and
+      $t_{k_1}, \dots, t_{k_n}$ is $t_1, \dots, t_n$
+      with the constants removed.
+    \item $t_1\times\cdots\times t_n ⇒
+      t_{k_1}\times\cdots\times t_{k_n}$: same as above if $c$ is $1$.
+\end{itemize}
+\end{RuleDescription}
+
+\begin{RuleDescription}{unary_minus_simplify}
+This rule is either
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $- (-t) ≈ t$ & \currule \\
+\end{AletheXS}
+or
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $-t ≈ u$ & \currule \\
+\end{AletheXS}
+where $u$ is the negated numerical constant $t$.
+\end{RuleDescription}
+
+\begin{RuleDescription}{minus_simplify}
+This rule simplifies a subtraction by applying equivalence-preserving
+transformations. The general form is
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $t_1- t_2 ≈ u$ & \currule \\
+\end{AletheXS}
+The possible transformations are:
+\begin{itemize}
+    \item $t - t ⇒ 0$
+    \item $t_1 - t_2 ⇒ t_3$ where $t_1$
+    and $t_2$ are numerical constants and $t_3$ is $t_2$ subtracted
+    from~$t_1$.
+    \item $t - 0 ⇒ t$
+    \item $0 - t ⇒ -t$
+\end{itemize}
+\end{RuleDescription}
+
+\begin{RuleDescription}{sum_simplify}
+This rule simplifies a sum by applying equivalence-preserving
+transformations until a fixed point is reached. The general form is
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $t_1+\cdots+t_n ≈ u$ & \currule \\
+\end{AletheXS}
+where $u$ is either a constant or a product.
+
+The possible transformations are:
+\begin{itemize}
+    \item $t_1+\cdots+t_n ⇒ c$ where all
+    $t_i$ are constants and $c$ is their sum.
+    \item $t_1+\cdots+t_n ⇒
+      c + t_{k_1}+\cdots+t_{k_n}$ where $c$
+      is the sum of the constants of $t_1, \dots, t_n$ and
+      $t_{k_1}, \dots, t_{k_n}$ is $t_1, \dots, t_n$
+      with the constants removed.
+    \item $t_1+\cdots+t_n ⇒
+      t_{k_1}+\cdots+t_{k_n}$: same as above if $c$ is
+      $0$.
+\end{itemize}
+\end{RuleDescription}
+
+\begin{RuleDescription}{comp_simplify}
+This rule simplifies a comparison by applying equivalence-preserving
+transformations until a fixed point is reached. The general form is
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $t_1 \bowtie t_2 ≈ \psi$ & \currule \\
+\end{AletheXS}
+where $\bowtie \in \{<, >, \leq, \geq\}$.
+
+The following transformation rules are used to simplify $t_1 \bowtie t_2$:
+\begin{itemize}
+    \item $s_1 < s_2 ⇒ \top$ if $s_1, s_2$ are numerical constants and
+      $s_1$ is strictly less than $s_2$
+    \item $s_1 < s_2 ⇒ \bot$ if $s_1, s_2$ are numerical constants and
+      $s_1$ is greater or equal than $s_2$
+
+    \item $s_1 \leq s_2 ⇒ \top$ if $s_1, s_2$ are numerical constants and
+      $s_1$ is less or equal than $s_2$
+    \item $s_1 \leq s_2 ⇒ \bot$ if $s_1, s_2$ are numerical constants and
+      $s_1$ is strictly greater than $s_2$
+
+    \item $s < s ⇒ \bot$
+    \item $s \leq s ⇒ \top$
+    \item $s_1 \geq s_2 ⇒ s_2 \leq s_1$
+    \item $s_1 < s_2 ⇒ \neg (s_2 \leq s_1)$
+    \item $s_1 > s_2 ⇒ \neg (s_1 \leq s_2)$
+\end{itemize}
+\end{RuleDescription}
+
+\begin{RuleDescription}{let}
+  This rule eliminates $\lsymb{let}$. It has the form
+
+\begin{AletheXS}
+$i_1$. & $\Gamma$ & \ctxsep & $t_{1} ≈ s_{1}$ & ($\dots$) \\
+\aletheLineS
+$i_n$. & $\Gamma$ & \ctxsep & $t_{n} ≈ s_{n}$ & ($\dots$) \\
+\aletheLineS
+$j$. & \spctx{$\Gamma, x_1 \mapsto s_1, \dots,  x_n \mapsto s_n$}
+   & \ctxsep &  $u ≈ u'$ & ($\dots$) \\
+\spsep
+$k$. & $\Gamma$ & \ctxsep &
+     $(\lsymb{let}\,x_1 = t_1,\, \dots,\, x_n = t_n\,\lsymb{in}\, u) ≈ u'$
+     & (\currule{}\;$i_1$, \dots, $i_n$) \\
+\end{AletheXS}
+
+  The premise $i_1, \dots, i_n$ must be in the same subproof as
+  the \currule{} step.  If for $t_i≈ s_i$ the $t_i$ and $s_i$
+  are syntactically equal, the premise
+  is omitted.
+\end{RuleDescription}
+
+\begin{RuleDescription}{bind_let}
+  This rule corresponds to the \proofRule{bind} rule for \inlineAlethe{let}.
+  It allows the renaming of the variables bound by the \inlineAlethe{let} step,
+  the rewriting of the substituted terms, and the rewriting of the body of the 
+  \inlineAlethe{let}, resulting in a new \inlineAlethe{let} term.  
+  It has the form
+
+\begin{AletheXS}
+$i_1$. & $\Gamma$ & \ctxsep & $t_{1} ≈ s_{1}$ & ($\dots$) \\
+\aletheLineS
+$i_n$. & $\Gamma$ & \ctxsep & $t_{n} ≈ s_{n}$ & ($\dots$) \\
+\aletheLineS
+$j$. & \spctx{$\Gamma, y_1,\dots, y_n,  x_1 \mapsto y_1, \dots ,  x_n \mapsto y_n$}
+   & \ctxsep &  $u ≈ u'$ & ($\dots$) \\
+\spsep
+$k$. & $\Gamma$ & \kern-5.5em\ctxsep & % The kern hacking here is to make the rule readable
+     $ \kern-3em (\lsymb{let}\,x_1~=~t_1,\, \dots,\, x_n~=~t_n \lsymb{in}\, u) ≈
+                 (\lsymb{let}\,y_1~=~s_1,\, \dots,\, y_n~=~s_n\,\lsymb{in}\, u')$
+     & (\currule{}\;$i_1$, \dots, $i_n$) \\
+\end{AletheXS}
+
+  The variables $y_1, \dots, y_n$ are neither free in
+  $(\lsymb{let}\,x_1 = t_1,\, \dots,\, x_n = t_n\,\lsymb{in}\, u)$ nor, for each
+  $y_i$ different from $x_i$, occur in $\Gamma$.
+
+  The premise $i_1, \dots, i_n$ must be in the same subproof as
+  the \currule{} step.  If for $t_i≈ s_i$ the $t_i$ and $s_i$
+  are syntactically equal, the premise
+  is omitted.
+\end{RuleDescription}
+
+\begin{RuleExample}
+The following example shows how this rule is used in a proof generated
+by Carcara's elaborator.  It elaborates an implicit application of
+symmetry of equality.
+\begin{AletheVerb}
+(step t1 (cl (= (= 0 1) (= 1 0))) :rule eq_symmetric)
+(anchor :step t2 :args ((p Bool) (:= (p Bool) p)))
+(step t2.t1 (cl (= (= p false) (= false p))) :rule eq_symmetric)
+(step t2 (cl (= (let ((p (= 0 1))) (= p false))
+                (let ((p (= 1 0))) (= false p))))
+         :rule bind_let :premises (t1))
+\end{AletheVerb}
+ 
+\end{RuleExample}
+
+\begin{RuleDescription}{distinct_elim}
+This rule eliminates the $\lsymb{distinct}$ predicate. If called with one
+argument this predicate always holds:
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $(\lsymb{distinct}\, t) ≈ \top$ & \currule \\
+\end{AletheXS}
+
+If applied to terms of type $\lsymb{Bool}$ more than two terms can never be
+distinct, hence only two cases are possible:
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ &
+$(\lsymb{distinct}\,\varphi\,\psi) ≈ \neg (\varphi ≈ \psi)$ & \currule \\
+\end{AletheXS}
+and
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ &
+$(\lsymb{distinct}\,\varphi_1\,\varphi_2\,\varphi_3\,\dots) ≈ \bot$ & \currule \\
+\end{AletheXS}
+
+The general case is
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ &
+$(\lsymb{distinct}\,t_1\,\dots\, t_n) ≈
+\bigwedge_{i=1}^{n}\bigwedge_{j=i+1}^{n} t_i\;{\not≈}\;t_j$ & \currule \\
+\end{AletheXS}
+\end{RuleDescription}
+
+\begin{RuleDescription}{la_rw_eq}
+\begin{AletheX}
+$i$. & \ctxsep & $(t ≈ u) ≈ (t \leq u \land u \leq t)$ & \currule \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{nary_elim}
+This rule replaces $n$-ary operators with their equivalent
+application of the binary operator. It is never applied to $\land$ or $\lor$.
+
+Three cases are possible.
+If the operator $\circ$ is left associative, then the rule has the form
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $\bigcirc_{i=1}^{n} t_i ≈ (\dots( t_1\circ  t_2) \circ  t_3)\circ \cdots  t_n)$
+ & \currule \\
+\end{AletheXS}
+
+If the operator $\circ$ is right associative, then the rule has the form
+
+\begin{AletheXS}
+$i$. & \ctxsep  & $\Gamma$ & $\bigcirc_{i=1}^{n} t_i ≈
+( t_1 \circ \cdots \circ ( t_{n-2} \circ ( t_{n-1} \circ  t_n)\dots)$ & \currule \\
+\end{AletheXS}
+
+If the operator is {\em chainable}, then it has the form
+
+\begin{AletheXS}
+$i$. & \ctxsep & $\Gamma$ & $\bigcirc_{i=1}^{n} t_i ≈
+( t_1\circ t_2) \land ( t_2 \circ  t_3) \land \cdots
+\land ( t_{n-1}\circ t_n)$ & \currule \\
+\end{AletheXS}
+\end{RuleDescription}
+
+\begin{RuleDescription}{bfun_elim}
+\begin{AletheX}
+$i$. & \ctxsep & $\psi$ & ($\dots$) \\
+$j$. & \ctxsep & $\varphi$ & (\currule\; $i$) \\
+\end{AletheX}
+
+The formula $\varphi$ is $\psi$ after boolean functions have been simplified.
+This happens in a two step process. Both steps recursively iterate over $\psi$.
+The first step expands quantified variable of type $\lsymb{Bool}$. Hence,
+$(\exists x.\,t)$ becomes $t[x\mapsto \bot]\lor t[x\mapsto \top]$ and
+$(\forall x.\,t)$ becomes $t[x\mapsto \bot]\land t[x\mapsto \top]$. If $n$ variables of sort
+$\lsymb{Bool}$ appear in a quantifier, the disjunction (conjunction) has
+$2^n$ terms. Each term replaces the variables in $t$ according
+to the bits of a number which is increased by one for each subsequent
+term starting from zero. The left-most variable corresponds to the
+least significant bit.
+
+The second step expands function argument of boolean types by introducing
+appropriate if-then-else terms. For example, consider $(f\,x\, P\, y)$ where
+$P$ is some formula. Then we replace this term by $(\lsymb{ite}\, P\,
+(f\,x\, \top\ y)\,(f\,x\, \bot\, y))$. If the argument is already the constant $\top$
+or $\bot$, it is ignored.
+\end{RuleDescription}
+
+\begin{RuleDescription}{ite_intro}
+\begin{AletheX}
+$i$. & \ctxsep & $t ≈ (t' \land u_1 \land \dots \land u_n)$ & (\currule) \\
+\end{AletheX}
+
+The term $t$ (the formula $\varphi$) contains the $\lsymb{ite}$ operator.
+Let $s_1, \dots, s_n$ be the terms starting with $\lsymb{ite}$, i.e.
+$s_i := \lsymb{ite}\,\psi_i\,r_i\,r'_i$, then $u_i$ has the form
+\[
+  \lsymb{ite}\,\psi_i\,(s_i ≈ r_i)\,(s_i ≈ r'_i)
+\]
+The term $t'$ is equal to the term $t$ up to the
+reordering of equalities where one argument is an $\lsymb{ite}$
+term.
+
+\ruleparagraph{Remark.} This rule stems from the introduction of fresh
+constants for if-then-else terms inside veriT. Internally $s_i$ is a new
+constant symbol and the $\varphi$ on the right side of the equality is
+$\varphi$ with the if-then-else terms replaced by the constants. Those
+constants are unfolded during proof printing. Hence, the slightly strange
+form and the reordering of equalities.
+\end{RuleDescription}
+
+\begin{RuleDescription}{bitblast_extract}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+
+\noindent
+where the formulas $\varphi_k$ are $(\lsymb{bitOf}_k\ x)$ for $i \leq k \leq j$.
+
+Alternatively, the rule may also be phrased as a ``short-circuiting'' of the
+above when $x$ is a $\lsymb{bbT}$ application:
+
+\medskip
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ (\lsymb{bbT}\ x_0\ \ldots\
+x_i\ \ldots \ x_j\ \ldots\ x_n)) ≈ (\lsymb{bbT}\ x_i\ \ldots\ x_j)$ & (\currule) \\
+\end{AletheX}
+
+\noindent
+This alternative is based on the validity of the equality
+\[
+\lsymb{bitOf}_k\ (\lsymb{bbT}\ x_0\ \ldots\ x_i\ \ldots \ x_j\ \ldots\ x_n) ≈ x_k
+\]
+for any bit-vector $x$ of size $n+1$, where $0\leq k\leq n$.
+
+\end{RuleDescription}
+
+\begin{RuleDescription}{bitblast_ult}
+\begin{AletheX}
+$i$. & \ctxsep & $(\lsymb{bvult}\ x\ y) ≈ \mathrm{res}_{n-1}$ & (\currule) \\
+\end{AletheX}
+in which both $x$ and $y$ must have the same type $(\lsymb{BitVec}\ n)$ and, for
+$i\geq 0$
+\[
+  \begin{array}{lcl}
+    \mathrm{res}_0&=&\neg (\lsymb{bitOf}_0\ x) \wedge (\lsymb{bitOf}_0\ y)\\
+    \mathrm{res}_{i+1}&=&(((\lsymb{bitOf}_{i+1}\ x) ≈ (\lsymb{bitOf}_{i+1}\ y))\wedge \mathrm{res}_i)\vee
+                       (\neg (\lsymb{bitOf}_{i+1}\ x) \wedge (\lsymb{bitOf}_{i+1}\ y))
+  \end{array}
+\]
+
+\noindent
+Alternatively, the rule may also be phrased as a ``short-circuiting'' of the
+above when $x$ and $y$ are ``$\lsymb{bbT}$'' applications. So given that
+\[
+  \begin{array}{lcl}
+    x&=&(\lsymb{bbT}\ x_0\ \ldots\ x_i\ \ldots \ x_j\ \ldots\ x_n)\\
+    y&=&(\lsymb{bbT}\ y_0\ \ldots\ y_i\ \ldots \ y_j\ \ldots\ y_n)\\
+  \end{array}
+\]
+then ``$\mathrm{res}$'' can be defined, for $i \geq 0$, as 
+\[
+  \begin{array}{lcl}
+    \mathrm{res}_0&=&\neg x_0 \wedge y_0\\
+    \mathrm{res}_{i+1}&=&((x_{i+1} ≈ y_{i+1})\wedge
+                          \mathrm{res}_i)\vee (\neg x_{i+1}\wedge y_{i+1})
+  \end{array}
+\]
+
+\end{RuleDescription}
+
+\begin{RuleDescription}{bitblast_add}
+\begin{AletheX}
+$i$. & \ctxsep & $(\lsymb{bvadd}\ x\ y) ≈ A_1$ & (\currule) \\
+\end{AletheX}
+in which both $x$ and $y$ must have the same type $(\lsymb{BitVec}\ n)$.
+The term ``$A_1$'' is
+\begin{align*}
+(\lsymb{bbT}\;& (((\lsymb{bitOf}_{0}\ x) \,\lsymb{xor}\,(\lsymb{bitOf}_{0}\ y))\,\lsymb{xor}\,\mathrm{carry}_0) \\
+              & (((\lsymb{bitOf}_{1}\ x) \,\lsymb{xor}\,(\lsymb{bitOf}_{1}\ y))\,\lsymb{xor}\,\mathrm{carry}_1) \\
+              & \ldots \\
+              & (((\lsymb{bitOf}_{n-1}\ x) \,\lsymb{xor}\, (\lsymb{bitOf}_{n-1}\ y))\,\lsymb{xor}\,\mathrm{carry}_{n-1}))
+\end{align*}
+and for $i\geq 0$
+\[
+  \begin{array}{lcl}
+    \mathrm{carry}_0&=&\bot\\
+    \mathrm{carry}_{i+1}&=&((\lsymb{bitOf}_{i}\ x) \wedge (\lsymb{bitOf}_{i}\ y))\vee(((\lsymb{bitOf}_{i}\ x)\,\lsymb{xor}\, (\lsymb{bitOf}_{i}\ y))\wedge \mathrm{carry}_i)
+  \end{array}
+\]
+
+\noindent
+Alternatively, the rule may also be phrased as a ``short-circuiting'' of the
+above when $x$ and $y$ are ``$\lsymb{bbT}$'' applications. So given that
+\[
+  \begin{array}{lcl}
+    x&=&(\lsymb{bbT}\ x_0\ \ldots\ x_i\ \ldots \ x_j\ \ldots\ x_n)\\
+    y&=&(\lsymb{bbT}\ y_0\ \ldots\ y_i\ \ldots \ y_j\ \ldots\ y_n)\\
+  \end{array}
+\]
+then the rule can be alternatively phrased as
+
+\begin{AletheX}
+$i$. & \ctxsep & $(\mathrm{bvadd}\ x\ y) ≈ A_2$ & (\currule) \\
+\end{AletheX}
+with $A_2 := (\lsymb{bbT}\ (x_0 \,\lsymb{xor}\, y_0)\,\lsymb{xor}\,\mathrm{carry}_0\ \ldots\ (x_{n-1}
+        \,\lsymb{xor}\, y_{n-1})\,\lsymb{xor}\,\mathrm{carry}_{n-1})$ and
+``$\mathrm{carry}$'' being defined, for $i \geq 0$, as 
+\[
+  \begin{array}{lcl}
+    \mathrm{carry}_0&=&\bot\\
+    \mathrm{carry}_{i+1}&=&(x_i\wedge y_i)\vee((x_i\,\lsymb{xor}\, y_i)\wedge \mathrm{carry}_i)
+  \end{array}
+\]
+
+\end{RuleDescription}
+
+% TODO
+\begin{RuleDescription}{concat_eq}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{concat_unify}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{concat_conflict}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{concat_split_prefix}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{concat_split_suffix}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{concat_csplit_prefix}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{concat_csplit_suffix}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{concat_lprop_prefix}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{concat_lprop_suffix}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{concat_cprop_prefix}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{concat_cprop_suffix}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{string_length_pos}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{string_length_non_empty}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{re_inter}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{re_unfold_neg}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{re_unfold_neg_concat_fixed_prefix}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{re_unfold_neg_concat_fixed_suffix}
+\begin{AletheX}
+$i$. & \ctxsep & $((\lsymb{extract}\ j\ i)\ x) ≈ (\lsymb{bbT}\ \varphi_i\ \ldots\ \varphi_j)$ & (\currule) \\
+\end{AletheX}
+\end{RuleDescription}
+
+\begin{RuleDescription}{symm}
+\begin{AletheX}
+$i$. & \ctxsep & $ \varphi ≈ \psi$ & ($\dots$) \\
+$j$. & \ctxsep & $ \psi ≈ \varphi$ & (\currule\; $i$) \\
+\end{AletheX}
+
+\noindent
+If $\varphi \neq \psi$ then the conclusion \emph{must not} be $\varphi ≈ \psi$.
+
+Note that since Alethe allows the implicit reordering of equalities, this
+rule is technically superfluous.  However, the rule is useful to indicate
+an explicit usage of the symmetry of equality to aid proof reconstruction.
+
+\begin{RuleExample}
+The side condition ensures that the following example is not a valid application
+of the rule.  Without this condition, this derivation could be obtained by
+applying symmetry of equality implicitly to the conclusion.
+
+\begin{AletheX}
+$10$. & \ctxsep & $ P(a) ≈ Q(b)$ & ($\dots$) \\
+$11$. & \ctxsep & $ P(a) ≈ Q(b)$ & (\currule\; $10$) \\
+\end{AletheX}
+\end{RuleExample}
+\end{RuleDescription}
+
+\begin{RuleDescription}{not_symm}
+\begin{AletheX}
+$i$. & \ctxsep & $ \neg (\varphi ≈ \psi)$  & ($\dots$) \\
+$j$. & \ctxsep & $ \neg (\psi ≈ \varphi)$  & (\currule\; $i$) \\
+\end{AletheX}
+
+\noindent
+If $\varphi \neq \psi$ then the conclusion \emph{must not} be $\neg (\varphi ≈ \psi)$.
+
+See \proofRule{symm} for an explanation of this rule.
+
+\end{RuleDescription}
+
+\begin{RuleDescription}{eq_symmetric}
+\begin{AletheX}
+$i$. & \ctxsep & $ (t_1 ≈ t_2) ≈ (t_2 ≈ t_1)$ & (\currule) \\
+\end{AletheX}
+
+\noindent
+Note that since Alethe allows the implicit reordering of equalities, this
+rule is technically superfluous.  However, the rule is useful to state
+an explicit usage of symmetry of equality reasoning to aid proof reconstruction.
+\end{RuleDescription}
+
+\clearpage
+\subsection{Index of Rules}
+\label{sec:alethe:rules-index}
+\printindex[rules]
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "doc"
+%%% End:
